@@ -138,7 +138,7 @@ export default function Home() {
           <div className="flex gap-[10px] items-end">
             {/* Malik Laing container - fills available width */}
             <div className="flex-1">
-              <h1 className="font-bold italic text-[96px] leading-[60%] tracking-[-0.07em] text-black">
+              <h1 className="font-bold italic text-[140px] leading-[60%] tracking-[-0.08em] text-black">
                 <span
                   className="text-transparent"
                   style={{

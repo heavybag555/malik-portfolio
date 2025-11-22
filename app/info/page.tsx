@@ -113,17 +113,15 @@ export default function Info() {
 
         <section className="w-full flex flex-col gap-[156px]">
           <div className="h-[80vh] flex flex-col justify-end relative z-10">
-            <div className="flex gap-[10px] items-end">
+            <div className="flex flex-col md:flex-row gap-[10px] items-end">
               {/* Malik Laing container - fills available width */}
-              <div className="flex-1">
+              <div className="flex-1 w-full md:w-auto">
                 <h1 className="font-bold italic text-[32px] leading-[60%] tracking-[0.1em]">
                   <span
                     className={`transition-all duration-[1500ms]`}
                     style={{
                       fontFamily: edwardianScript.style.fontFamily,
-                      color: "transparent",
-                      WebkitTextStroke: "0.5px #0043E0",
-                      paintOrder: "stroke fill",
+                      color: "white",
                     }}
                   >
                     {displayedText}
@@ -135,21 +133,22 @@ export default function Info() {
               </div>
 
               <div
-                className={`flex-1 flex flex-col gap-[12px] text-[13px] font-medium leading-[1.4] tracking-[0.03em] transition-colors duration-[1500ms] ${
+                className={`flex-1 w-full md:w-auto flex flex-col gap-[12px] text-[13px] font-medium leading-[1.4] tracking-[0.03em] transition-colors duration-[1500ms] ${
                   scrolled ? "text-white" : "text-[#0043e0]"
                 }`}
               >
-                <div className="flex justify-between items-start">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-[12px] md:gap-0">
                   <div className="flex-1">
                     <p className="max-w-[400px]">
                       Renell Medrano is a Dominican-American photographer and director from The Bronx, New York, whose work focuses on finding vulnerability in her subjects, drawing inspiration from New York City and her motherland of the Dominican Republic. She graduated from Parsons School of Design | The New School with a degree in Photography. In 2015, she was awarded "New York Times Lens Blog Award" for her photography series 'Untitled Youth', which explored 4 teenage girls living in the Bronx going through adolescence. Her commercial fashion photography has been published in dozens of publications such as Vogue, Elle, Harper's Bazaar, GQ, CR Men, and W.
                     </p>
                   </div>
-                  <span>1998</span>
+                  <span className="hidden md:inline">1998</span>
                 </div>
                 <p className="max-w-[400px]">
                   She has shot campaigns for various brands, including, Burberry, Gucci and Prada. Medrano has had three solo photography exhibitions. Peluca at MILK studios, New York, 2019, Pampara at Gallery Rosenfeld in London in 2020 and Lambon at WSA, New York in 2024. Group shows include 20TK's "The Next Generation of Bronx Photographers," Just Pictures and Aperture Foundation's ground-breaking traveling exhibition, the New Black Vanguard: Photography between Art and Fashion.
                 </p>
+                <span className="md:hidden">1998</span>
               </div>
             </div>
           </div>

@@ -82,14 +82,14 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-100 bg-white flex items-center justify-center transition-opacity duration-500 ease-in-out ${
+      className={`fixed inset-0 z-100 bg-white flex items-start justify-start transition-opacity duration-500 ease-in-out ${
         isFadingOut ? "opacity-0" : "opacity-100"
       }`}
     >
       <div className="w-full max-w-[771px] px-8">
-        <div className="flex flex-col items-center justify-center gap-0">
+        <div className="flex flex-col items-start justify-start gap-0">
           {/* First name */}
-          <div className="flex items-center justify-center gap-x-[2px]">
+          <div className="flex items-center justify-start gap-x-[2px]">
             {firstNameLetters.map((letter, index) => {
               const isVisible = index < visibleCount;
 
@@ -116,7 +116,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
             })}
           </div>
           {/* Last name */}
-          <div className="flex items-center justify-center gap-x-[2px]">
+          <div className="flex items-center justify-start gap-x-[2px]">
             {lastNameLetters.map((letter, index) => {
               const isVisible = index + firstNameLetters.length < visibleCount;
 

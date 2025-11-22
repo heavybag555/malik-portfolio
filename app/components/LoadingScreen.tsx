@@ -81,10 +81,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
                   lineHeight: "0.9",
                   color: "transparent",
                   WebkitTextStroke: "1px #0043E0",
-                  WebkitTextStrokeWidth: "1px",
-                  WebkitTextStrokeColor: "#0043E0",
                   paintOrder: "stroke fill",
-                  textStroke: "1px #0043E0",
                   opacity: isVisible ? 1 : 0,
                   width: isSpace ? "0.3em" : "auto",
                 }}

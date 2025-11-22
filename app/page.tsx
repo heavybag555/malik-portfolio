@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import LoadingScreen from "./components/LoadingScreen";
+import Lightbox from "./components/Lightbox";
 
 // Server-side data fetching moved to a separate function
 const photoOrder = [
@@ -92,12 +94,26 @@ const photoOrder = [
 ];
 
 export default function Home() {
+  const [showLoading, setShowLoading] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isOverImage, setIsOverImage] = useState(false);
   const [displayedText, setDisplayedText] = useState("");
   const [typingComplete, setTypingComplete] = useState(false);
   const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set());
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const fullText = "Malik Laing";
+
+  // Check if loading screen has already been shown
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hasSeenLoading = sessionStorage.getItem("hasSeenLoading");
+      if (!hasSeenLoading) {
+        setShowLoading(true);
+        sessionStorage.setItem("hasSeenLoading", "true");
+      }
+    }
+  }, []);
 
   // Typewriter effect for "Malik Laing"
   useEffect(() => {
@@ -200,138 +216,174 @@ export default function Home() {
   });
 
   return (
-    <main
-      className={`w-full min-h-screen p-[12px] pb-[48px] flex flex-col gap-[48px] transition-colors duration-[1500ms] ${
-        scrolled ? "bg-[#0043e0]" : "bg-white"
-      }`}
-    >
-      {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 py-[4px] px-[12px] backdrop-blur-md">
-        <div
-          className={`w-full flex items-start gap-[8px] text-[13px] font-medium leading-none tracking-[0.03em] transition-colors duration-300 ${
-            isOverImage
-              ? "text-white"
-              : scrolled
-              ? "text-white"
-              : "text-[#0043e0]"
-          }`}
-        >
-          <div className="flex-1">M.L.</div>
-          <div className="flex-1 flex justify-between items-start">
-            <nav className="flex gap-[12px]">
+    <>
+      {showLoading && (
+        <LoadingScreen
+          onComplete={() => {
+            setShowLoading(false);
+          }}
+        />
+      )}
+      <main
+        className={`w-full min-h-screen p-[12px] pb-[48px] flex flex-col gap-[48px] transition-all duration-[1500ms] ${
+          scrolled ? "bg-[#0043e0]" : "bg-white"
+        } ${
+          showLoading
+            ? "opacity-0 pointer-events-none"
+            : "opacity-100 pointer-events-auto"
+        }`}
+        style={{
+          transition: "opacity 0.6s ease-in-out, background-color 1500ms",
+        }}
+      >
+        {/* Fixed Header */}
+        <header className="fixed top-0 left-0 right-0 z-50 py-[4px] px-[12px] backdrop-blur-md">
+          <div
+            className={`w-full flex items-start gap-[8px] text-[13px] font-medium leading-none tracking-[0.03em] transition-colors duration-300 ${
+              isOverImage
+                ? "text-white"
+                : scrolled
+                ? "text-white"
+                : "text-[#0043e0]"
+            }`}
+          >
+            <div className="flex-1">M.L.</div>
+            <div className="flex-1 flex justify-between items-start">
+              <nav className="flex gap-[12px]">
+                <div>
+                  <a href="#overview" className="hover:opacity-60">
+                    Overview
+                  </a>
+                </div>
+                <div>
+                  <a href="#index" className="hover:opacity-60">
+                    Index
+                  </a>
+                </div>
+              </nav>
               <div>
-                <a href="#overview" className="hover:opacity-60">
-                  Overview
+                <a href="/info" className="hover:opacity-60">
+                  Info
                 </a>
               </div>
-              <div>
-                <a href="#index" className="hover:opacity-60">
-                  Index
-                </a>
-              </div>
-            </nav>
-            <div>Info</div>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <section className="w-full flex flex-col gap-[156px]">
-        <div className="h-[40vh] flex flex-col justify-end relative z-10">
-          <div className="flex gap-[10px] items-end">
-            {/* Malik Laing container - fills available width */}
-            <div className="flex-1">
-              <h1 className="font-bold italic text-[21px] leading-[60%] tracking-[-0.06em]">
-                <span
-                  className={`text-[#0043e0] transition-all duration-[1500ms]`}
-                  style={{
-                    fontFamily: "Times New Roman, serif",
+        <section className="w-full flex flex-col gap-[156px]">
+          <div className="h-[40vh] flex flex-col justify-end relative z-10">
+            <div className="flex gap-[10px] items-end">
+              {/* Malik Laing container - fills available width */}
+              <div className="flex-1">
+                <h1 className="font-bold italic text-[21px] leading-[60%] tracking-[-0.06em]">
+                  <span
+                    className={`text-[#0043e0] transition-all duration-[1500ms]`}
+                    style={{
+                      fontFamily: "Times New Roman, serif",
+                    }}
+                  >
+                    {displayedText}
+                    {!typingComplete && (
+                      <span className="animate-pulse">|</span>
+                    )}
+                  </span>
+                </h1>
+              </div>
+
+              <div
+                className={`flex-1 flex justify-between items-start text-[13px] font-medium leading-none tracking-[0.03em] transition-colors duration-[1500ms] ${
+                  scrolled ? "text-white" : "text-[#0043e0]"
+                }`}
+              >
+                <p className="max-w-[403px]">
+                  Photographer and director from San Bernardino, California.
+                </p>
+                <span>1998</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Gallery Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-[12px] gap-y-[48px] items-end">
+            {projects.map((project, i) => {
+              const columnIndex = i % 6; // 0-5 for 6 columns
+              const isVisible = visibleImages.has(i);
+              const transitionDelay = columnIndex * 150; // 150ms stagger per column for more delay
+
+              return (
+                <div
+                  key={i}
+                  data-image-index={i}
+                  className="flex flex-col gap-[4px] group cursor-pointer"
+                  onClick={() => {
+                    setCurrentImageIndex(i);
+                    setLightboxOpen(true);
                   }}
                 >
-                  {displayedText}
-                  {!typingComplete && <span className="animate-pulse">|</span>}
-                </span>
-              </h1>
-            </div>
-
-            <div
-              className={`flex-1 flex justify-between items-start text-[13px] font-medium leading-none tracking-[0.03em] transition-colors duration-[1500ms] ${
-                scrolled ? "text-white" : "text-[#0043e0]"
-              }`}
-            >
-              <p className="max-w-[403px]">
-                Photographer and director from San Bernardino, California.
-              </p>
-              <span>1998</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Gallery Grid */}
-        <div className="grid grid-cols-6 gap-x-[12px] gap-y-[48px]">
-          {projects.map((project, i) => {
-            const columnIndex = i % 6; // 0-5 for 6 columns
-            const isVisible = visibleImages.has(i);
-            const transitionDelay = columnIndex * 150; // 150ms stagger per column for more delay
-
-            return (
-              <div
-                key={i}
-                data-image-index={i}
-                className="flex flex-col gap-[10px] group cursor-pointer"
-              >
-                <div className="w-full relative">
-                  <Image
-                    src={project.image}
-                    alt={project.title}
-                    width={800}
-                    height={800}
-                    className="w-full h-auto"
+                  <div className="w-full relative">
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      width={800}
+                      height={800}
+                      className="w-full h-auto"
+                      style={{
+                        opacity: isVisible ? 1 : 0,
+                        transform: isVisible
+                          ? "scale(1) translateY(0)"
+                          : "scale(0.98) translateY(8px)",
+                        transition:
+                          "opacity 0.8s ease-out, transform 0.8s ease-out",
+                        transitionDelay: isVisible
+                          ? `${transitionDelay}ms`
+                          : "0ms",
+                      }}
+                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                    />
+                  </div>
+                  <div
+                    className="flex flex-col gap-[2px] text-[11px] font-medium leading-none tracking-[0.03em]"
                     style={{
                       opacity: isVisible ? 1 : 0,
                       transform: isVisible
-                        ? "scale(1) translateY(0)"
-                        : "scale(0.98) translateY(8px)",
+                        ? "translateY(0)"
+                        : "translateY(5px)",
                       transition:
-                        "opacity 0.8s ease-out, transform 0.8s ease-out",
+                        "opacity 0.6s ease-out, transform 0.6s ease-out",
                       transitionDelay: isVisible
-                        ? `${transitionDelay}ms`
+                        ? `${transitionDelay + 300}ms`
                         : "0ms",
                     }}
-                    sizes="16vw"
-                  />
-                </div>
-                <div
-                  className="flex flex-col gap-[2px] text-[11px] font-medium leading-none tracking-[0.03em]"
-                  style={{
-                    opacity: isVisible ? 1 : 0,
-                    transform: isVisible ? "translateY(0)" : "translateY(5px)",
-                    transition:
-                      "opacity 0.6s ease-out, transform 0.6s ease-out",
-                    transitionDelay: isVisible
-                      ? `${transitionDelay + 300}ms`
-                      : "0ms",
-                  }}
-                >
-                  <span
-                    className={`transition-colors duration-[1500ms] ${
-                      scrolled ? "text-white" : "text-black"
-                    }`}
                   >
-                    {project.title}
-                  </span>
-                  <span
-                    className={`transition-colors duration-[1500ms] ${
-                      scrolled ? "text-[#D0D0D0]" : "text-[#ACACAC]"
-                    }`}
-                  >
-                    {project.description}
-                  </span>
+                    <span
+                      className={`transition-colors duration-[1500ms] ${
+                        scrolled ? "text-white" : "text-black"
+                      }`}
+                    >
+                      {project.title}
+                    </span>
+                    <span
+                      className={`transition-colors duration-[1500ms] ${
+                        scrolled ? "text-[#D0D0D0]" : "text-[#ACACAC]"
+                      }`}
+                    >
+                      {project.description}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-    </main>
+              );
+            })}
+          </div>
+        </section>
+      </main>
+      <Lightbox
+        isOpen={lightboxOpen}
+        currentIndex={currentImageIndex}
+        images={projects}
+        onClose={() => setLightboxOpen(false)}
+        onNavigate={(index) => setCurrentImageIndex(index)}
+        scrolled={scrolled}
+      />
+    </>
   );
 }

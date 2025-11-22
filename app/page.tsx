@@ -235,16 +235,18 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="w-full flex flex-col gap-[4px]">
+      <section className="w-full flex flex-col gap-[164px]">
         <div className="h-[40vh] flex flex-col justify-end relative z-10">
           <div className="flex gap-[10px] items-end">
             {/* Malik Laing container - fills available width */}
             <div className="flex-1">
-              <h1 className="font-bold italic text-[140px] leading-[60%] tracking-[-0.08em]">
+              <h1 className="font-bold italic text-[96px] leading-[60%] tracking-[-0.06em]">
                 <span
                   className={`text-transparent transition-all duration-[1500ms]`}
                   style={{
-                    WebkitTextStroke: scrolled ? "1px white" : "1px #0043e0",
+                    WebkitTextStroke: scrolled
+                      ? "0.5px white"
+                      : "0.5px #0043e0",
                     fontFamily: "Times New Roman, serif",
                   }}
                 >
@@ -255,7 +257,7 @@ export default function Home() {
             </div>
 
             <div
-              className={`flex-1 flex justify-between items-start self-start text-[13px] font-medium leading-none tracking-[0.03em] transition-colors duration-[1500ms] ${
+              className={`flex-1 flex justify-between items-start text-[13px] font-medium leading-none tracking-[0.03em] transition-colors duration-[1500ms] ${
                 scrolled ? "text-white" : "text-[#0043e0]"
               }`}
             >
@@ -268,7 +270,7 @@ export default function Home() {
         </div>
 
         {/* Gallery Grid */}
-        <div className="grid grid-cols-6 gap-x-[12px] gap-y-[24px]">
+        <div className="grid grid-cols-6 gap-x-[12px] gap-y-[48px]">
           {projects.map((project, i) => {
             const columnIndex = i % 6; // 0-5 for 6 columns
             const isVisible = visibleImages.has(i);

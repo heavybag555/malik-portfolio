@@ -74,11 +74,11 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
                 className="inline-block transition-opacity duration-300 ease-out"
                 style={{
                   fontFamily: edwardianScript.style.fontFamily,
-                  fontSize: "clamp(2.5rem, 10vw, 8rem)",
+                  fontSize: "clamp(5rem, 20vw, 16rem)",
                   fontWeight: "bold",
                   fontStyle: "italic",
-                  letterSpacing: "0.1em",
-                  lineHeight: "0.9",
+                  letterSpacing: "0",
+                  lineHeight: "0.6",
                   color: "transparent",
                   WebkitTextStroke: "1px #0043E0",
                   paintOrder: "stroke fill",

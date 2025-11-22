@@ -240,13 +240,10 @@ export default function Home() {
           <div className="flex gap-[10px] items-end">
             {/* Malik Laing container - fills available width */}
             <div className="flex-1">
-              <h1 className="font-bold italic text-[96px] leading-[60%] tracking-[-0.06em]">
+              <h1 className="font-bold italic text-[21px] leading-[60%] tracking-[-0.06em]">
                 <span
-                  className={`text-transparent transition-all duration-[1500ms]`}
+                  className={`text-[#0043e0] transition-all duration-[1500ms]`}
                   style={{
-                    WebkitTextStroke: scrolled
-                      ? "0.5px white"
-                      : "0.5px #0043e0",
                     fontFamily: "Times New Roman, serif",
                   }}
                 >

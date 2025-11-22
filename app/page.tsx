@@ -235,7 +235,7 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="w-full flex flex-col gap-[164px]">
+      <section className="w-full flex flex-col gap-[156px]">
         <div className="h-[40vh] flex flex-col justify-end relative z-10">
           <div className="flex gap-[10px] items-end">
             {/* Malik Laing container - fills available width */}

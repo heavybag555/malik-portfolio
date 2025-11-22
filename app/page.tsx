@@ -74,7 +74,6 @@ const photoOrder = [
   "C32A5435.jpg",
   "Laing0049.jpg",
   "MALI699-049.jpg",
-  "IMG3415-R01-007A.jpg",
   "000065990011.jpg",
   "000060360015.jpg",
   "000094990036.jpg",

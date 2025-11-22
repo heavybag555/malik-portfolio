@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { edwardianScript } from "../fonts";
 
 interface LoadingScreenProps {
   onComplete: () => void;
@@ -72,14 +73,18 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
                 key={`${letter}-${index}`}
                 className="inline-block transition-opacity duration-300 ease-out"
                 style={{
-                  fontFamily: "Times New Roman, serif",
-                  fontSize: "clamp(2rem, 8vw, 6rem)",
+                  fontFamily: edwardianScript.style.fontFamily,
+                  fontSize: "clamp(2.5rem, 10vw, 8rem)",
                   fontWeight: "bold",
                   fontStyle: "italic",
-                  letterSpacing: "-0.08em",
+                  letterSpacing: "0.1em",
                   lineHeight: "0.9",
                   color: "transparent",
                   WebkitTextStroke: "1px #0043E0",
+                  WebkitTextStrokeWidth: "1px",
+                  WebkitTextStrokeColor: "#0043E0",
+                  paintOrder: "stroke fill",
+                  textStroke: "1px #0043E0",
                   opacity: isVisible ? 1 : 0,
                   width: isSpace ? "0.3em" : "auto",
                 }}

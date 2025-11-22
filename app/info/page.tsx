@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import LoadingScreen from "../components/LoadingScreen";
+import { edwardianScript } from "../fonts";
 
 export default function Info() {
   const [showLoading, setShowLoading] = useState(false);
@@ -115,11 +116,17 @@ export default function Info() {
             <div className="flex gap-[10px] items-end">
               {/* Malik Laing container - fills available width */}
               <div className="flex-1">
-                <h1 className="font-bold italic text-[21px] leading-[60%] tracking-[-0.06em]">
+                <h1 className="font-bold italic text-[32px] leading-[60%] tracking-[0.1em]">
                   <span
-                    className={`text-white transition-all duration-[1500ms]`}
+                    className={`transition-all duration-[1500ms]`}
                     style={{
-                      fontFamily: "Times New Roman, serif",
+                      fontFamily: edwardianScript.style.fontFamily,
+                      color: "transparent",
+                      WebkitTextStroke: "0.5px #0043E0",
+                      WebkitTextStrokeWidth: "0.5px",
+                      WebkitTextStrokeColor: "#0043E0",
+                      paintOrder: "stroke fill",
+                      textStroke: "0.5px #0043E0",
                     }}
                   >
                     {displayedText}

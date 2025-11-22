@@ -9,7 +9,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-serif: "Times New Roman", Times, serif;
+  --font-serif: var(--font-edwardian), "edwardianscriptitc", serif;
 }
 
 body {

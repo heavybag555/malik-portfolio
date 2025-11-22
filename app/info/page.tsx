@@ -123,10 +123,7 @@ export default function Info() {
                       fontFamily: edwardianScript.style.fontFamily,
                       color: "transparent",
                       WebkitTextStroke: "0.5px #0043E0",
-                      WebkitTextStrokeWidth: "0.5px",
-                      WebkitTextStrokeColor: "#0043E0",
                       paintOrder: "stroke fill",
-                      textStroke: "0.5px #0043E0",
                     }}
                   >
                     {displayedText}

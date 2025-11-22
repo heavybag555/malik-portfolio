@@ -95,6 +95,59 @@ const photoOrder = [
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [isOverImage, setIsOverImage] = useState(false);
+  const [displayedText, setDisplayedText] = useState("");
+  const [typingComplete, setTypingComplete] = useState(false);
+  const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set());
+  const fullText = "Malik Laing";
+
+  // Typewriter effect for "Malik Laing"
+  useEffect(() => {
+    let currentIndex = 0;
+    const typingSpeed = 100; // milliseconds per character
+
+    const typeNextChar = () => {
+      if (currentIndex <= fullText.length) {
+        setDisplayedText(fullText.slice(0, currentIndex));
+        currentIndex++;
+        if (currentIndex > fullText.length) {
+          setTypingComplete(true);
+        } else {
+          setTimeout(typeNextChar, typingSpeed);
+        }
+      }
+    };
+
+    // Start typing after a brief delay
+    const initialDelay = setTimeout(typeNextChar, 500);
+
+    return () => clearTimeout(initialDelay);
+  }, []);
+
+  // Intersection Observer for image fade-in
+  useEffect(() => {
+    const imageElements = document.querySelectorAll("[data-image-index]");
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = parseInt(
+              entry.target.getAttribute("data-image-index") || "0"
+            );
+            setVisibleImages((prev) => new Set(prev).add(index));
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: "50px",
+      }
+    );
+
+    imageElements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -196,7 +249,8 @@ export default function Home() {
                     fontFamily: "Times New Roman, serif",
                   }}
                 >
-                  Malik Laing
+                  {displayedText}
+                  {!typingComplete && <span className="animate-pulse">|</span>}
                 </span>
               </h1>
             </div>
@@ -216,39 +270,70 @@ export default function Home() {
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-6 gap-x-[12px] gap-y-[24px]">
-          {projects.map((project, i) => (
-            <div
-              key={i}
-              className="flex flex-col gap-[10px] group cursor-pointer"
-            >
-              <div className="w-full relative">
-                <Image
-                  src={project.image}
-                  alt={project.title}
-                  width={800}
-                  height={800}
-                  className="w-full h-auto"
-                  sizes="16vw"
-                />
-              </div>
-              <div className="flex flex-col gap-[2px] text-[11px] font-medium leading-none tracking-[0.03em]">
-                <span
-                  className={`transition-colors duration-[1500ms] ${
-                    scrolled ? "text-white" : "text-black"
-                  }`}
+          {projects.map((project, i) => {
+            const columnIndex = i % 6; // 0-5 for 6 columns
+            const isVisible = visibleImages.has(i);
+            const transitionDelay = columnIndex * 150; // 150ms stagger per column for more delay
+
+            return (
+              <div
+                key={i}
+                data-image-index={i}
+                className="flex flex-col gap-[10px] group cursor-pointer"
+              >
+                <div className="w-full relative">
+                  <Image
+                    src={project.image}
+                    alt={project.title}
+                    width={800}
+                    height={800}
+                    className="w-full h-auto"
+                    style={{
+                      opacity: isVisible ? 1 : 0,
+                      transform: isVisible
+                        ? "scale(1) translateY(0)"
+                        : "scale(0.98) translateY(8px)",
+                      transitionProperty: "opacity, transform",
+                      transitionDuration: "0.8s",
+                      transitionTimingFunction: "ease-out",
+                      transitionDelay: isVisible
+                        ? `${transitionDelay}ms`
+                        : "0ms",
+                    }}
+                    sizes="16vw"
+                  />
+                </div>
+                <div
+                  className="flex flex-col gap-[2px] text-[11px] font-medium leading-none tracking-[0.03em]"
+                  style={{
+                    opacity: isVisible ? 1 : 0,
+                    transform: isVisible ? "translateY(0)" : "translateY(5px)",
+                    transitionProperty: "opacity, transform",
+                    transitionDuration: "0.6s",
+                    transitionTimingFunction: "ease-out",
+                    transitionDelay: isVisible
+                      ? `${transitionDelay + 300}ms`
+                      : "0ms",
+                  }}
                 >
-                  {project.title}
-                </span>
-                <span
-                  className={`transition-colors duration-[1500ms] ${
-                    scrolled ? "text-[#D0D0D0]" : "text-[#ACACAC]"
-                  }`}
-                >
-                  {project.description}
-                </span>
+                  <span
+                    className={`transition-colors duration-[1500ms] ${
+                      scrolled ? "text-white" : "text-black"
+                    }`}
+                  >
+                    {project.title}
+                  </span>
+                  <span
+                    className={`transition-colors duration-[1500ms] ${
+                      scrolled ? "text-[#D0D0D0]" : "text-[#ACACAC]"
+                    }`}
+                  >
+                    {project.description}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </main>

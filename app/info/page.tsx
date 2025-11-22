@@ -116,7 +116,7 @@ export default function Info() {
             <div className="flex flex-col md:flex-row gap-[10px] items-end">
               {/* Malik Laing container - fills available width */}
               <div className="flex-1 w-full md:w-auto">
-                <h1 className="font-bold italic text-[32px] leading-[60%] tracking-[0.1em]">
+                <h1 className="font-bold italic text-[32px] leading-[60%] tracking-[0.0em]">
                   <span
                     className={`transition-all duration-[1500ms]`}
                     style={{

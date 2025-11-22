@@ -202,7 +202,7 @@ export default function Home() {
 
   return (
     <main
-      className={`w-full min-h-screen p-[12px] pb-[48px] flex flex-col gap-[48px] transition-colors duration-1500 ${
+      className={`w-full min-h-screen p-[12px] pb-[48px] flex flex-col gap-[48px] transition-colors duration-[1500ms] ${
         scrolled ? "bg-[#0043e0]" : "bg-white"
       }`}
     >
@@ -243,7 +243,7 @@ export default function Home() {
             <div className="flex-1">
               <h1 className="font-bold italic text-[140px] leading-[60%] tracking-[-0.08em]">
                 <span
-                  className={`text-transparent transition-all duration-1500`}
+                  className={`text-transparent transition-all duration-[1500ms]`}
                   style={{
                     WebkitTextStroke: scrolled ? "1px white" : "1px #0043e0",
                     fontFamily: "Times New Roman, serif",
@@ -256,7 +256,7 @@ export default function Home() {
             </div>
 
             <div
-              className={`flex-1 flex flex-col md:flex-row md:justify-between items-start gap-[8px] md:gap-0 text-[13px] font-medium leading-none tracking-[0.03em] transition-colors duration-1500 ${
+              className={`flex-1 flex justify-between items-start self-start text-[13px] font-medium leading-none tracking-[0.03em] transition-colors duration-[1500ms] ${
                 scrolled ? "text-white" : "text-[#0043e0]"
               }`}
             >
@@ -269,10 +269,9 @@ export default function Home() {
         </div>
 
         {/* Gallery Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-[12px] gap-y-[24px]">
+        <div className="grid grid-cols-6 gap-x-[12px] gap-y-[24px]">
           {projects.map((project, i) => {
-            // Calculate column index based on screen size for stagger effect
-            const columnIndex = i % 2; // Default to 2 columns (mobile)
+            const columnIndex = i % 6; // 0-5 for 6 columns
             const isVisible = visibleImages.has(i);
             const transitionDelay = columnIndex * 150; // 150ms stagger per column for more delay
 
@@ -294,9 +293,8 @@ export default function Home() {
                       transform: isVisible
                         ? "scale(1) translateY(0)"
                         : "scale(0.98) translateY(8px)",
-                      transitionProperty: "opacity, transform",
-                      transitionDuration: "0.8s",
-                      transitionTimingFunction: "ease-out",
+                      transition:
+                        "opacity 0.8s ease-out, transform 0.8s ease-out",
                       transitionDelay: isVisible
                         ? `${transitionDelay}ms`
                         : "0ms",
@@ -309,23 +307,22 @@ export default function Home() {
                   style={{
                     opacity: isVisible ? 1 : 0,
                     transform: isVisible ? "translateY(0)" : "translateY(5px)",
-                    transitionProperty: "opacity, transform",
-                    transitionDuration: "0.6s",
-                    transitionTimingFunction: "ease-out",
+                    transition:
+                      "opacity 0.6s ease-out, transform 0.6s ease-out",
                     transitionDelay: isVisible
                       ? `${transitionDelay + 300}ms`
                       : "0ms",
                   }}
                 >
                   <span
-                    className={`transition-colors duration-1500 ${
+                    className={`transition-colors duration-[1500ms] ${
                       scrolled ? "text-white" : "text-black"
                     }`}
                   >
                     {project.title}
                   </span>
                   <span
-                    className={`transition-colors duration-1500 ${
+                    className={`transition-colors duration-[1500ms] ${
                       scrolled ? "text-[#D0D0D0]" : "text-[#ACACAC]"
                     }`}
                   >

@@ -2,7 +2,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #0043e0; /* Extracted from Figma: r:0.0, g:0.26, b:0.88 */
+  --foreground: #000000;
 }
 
 @theme inline {

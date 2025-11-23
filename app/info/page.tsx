@@ -1,49 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import LoadingScreen from "../components/LoadingScreen";
 import { edwardianScript } from "../fonts";
 
 export default function Info() {
-  const [showLoading, setShowLoading] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isOverImage, setIsOverImage] = useState(false);
-  const [displayedText, setDisplayedText] = useState("");
-  const [typingComplete, setTypingComplete] = useState(false);
+  const [lettersVisible, setLettersVisible] = useState(false);
   const fullText = "Malik Laing";
+  const letters = fullText.split("");
 
-  // Check if loading screen has already been shown
+  // Trigger letter fade-in animation
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const hasSeenLoading = sessionStorage.getItem("hasSeenLoading");
-      if (!hasSeenLoading) {
-        setShowLoading(true);
-        sessionStorage.setItem("hasSeenLoading", "true");
-      }
-    }
-  }, []);
-
-  // Typewriter effect for "Malik Laing"
-  useEffect(() => {
-    let currentIndex = 0;
-    const typingSpeed = 100; // milliseconds per character
-
-    const typeNextChar = () => {
-      if (currentIndex <= fullText.length) {
-        setDisplayedText(fullText.slice(0, currentIndex));
-        currentIndex++;
-        if (currentIndex > fullText.length) {
-          setTypingComplete(true);
-        } else {
-          setTimeout(typeNextChar, typingSpeed);
-        }
-      }
-    };
-
-    // Start typing after a brief delay
-    const initialDelay = setTimeout(typeNextChar, 500);
-
-    return () => clearTimeout(initialDelay);
+    const timer = setTimeout(() => {
+      setLettersVisible(true);
+    }, 500);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -66,19 +38,12 @@ export default function Info() {
 
   return (
     <>
-      {showLoading && (
-        <LoadingScreen onComplete={() => setShowLoading(false)} />
-      )}
       <main
         className={`w-full min-h-screen p-[12px] pb-[48px] flex flex-col gap-[48px] transition-all duration-[1500ms] ${
           scrolled ? "bg-[#0043e0]" : "bg-white"
-        } ${
-          showLoading
-            ? "opacity-0 pointer-events-none"
-            : "opacity-100 pointer-events-auto"
-        }`}
+        } opacity-100 pointer-events-auto`}
         style={{
-          transition: "opacity 0.6s ease-in-out, background-color 1500ms",
+          transition: "background-color 1500ms",
         }}
       >
         {/* Fixed Header */}
@@ -92,7 +57,11 @@ export default function Info() {
                 : "text-[#0043e0]"
             }`}
           >
-            <div className="flex-1">M.L.</div>
+            <div className="flex-1">
+              <a href="/" className="hover:opacity-60">
+                M.L.
+              </a>
+            </div>
             <div className="flex-1 flex justify-between items-start">
               <nav className="flex gap-[12px]">
                 <div>
@@ -101,33 +70,44 @@ export default function Info() {
                   </a>
                 </div>
                 <div>
-                  <a href="/#index" className="hover:opacity-60">
-                    Index
+                  <a href="/info" className="hover:opacity-60">
+                    Info
                   </a>
                 </div>
               </nav>
-              <div>Info</div>
+              <div>
+                <a href="mailto:malikphoto1@gmail.com" className="hover:opacity-60">
+                  Contact
+                </a>
+              </div>
             </div>
           </div>
         </header>
 
-        <section className="w-full flex flex-col gap-[156px]">
-          <div className="h-[80vh] flex flex-col justify-end relative z-10">
-            <div className="flex flex-col md:flex-row gap-[10px] items-end">
+        <section className="w-full flex flex-col gap-[156px] pt-[400px]">
+          <div className="flex flex-col justify-start relative z-10">
+            <div className="flex flex-col md:flex-row gap-[10px] items-start">
               {/* Malik Laing container - fills available width */}
               <div className="flex-1 w-full md:w-auto">
                 <h1 className="font-bold italic text-[32px] leading-[60%] tracking-[0.0em]">
                   <span
-                    className={`transition-all duration-[1500ms]`}
                     style={{
                       fontFamily: edwardianScript.style.fontFamily,
                       color: "white",
                     }}
                   >
-                    {displayedText}
-                    {!typingComplete && (
-                      <span className="animate-pulse">|</span>
-                    )}
+                    {letters.map((letter, index) => (
+                      <span
+                        key={index}
+                        style={{
+                          opacity: lettersVisible ? 1 : 0,
+                          transition: "opacity 1200ms ease-in-out",
+                          transitionDelay: lettersVisible ? `${index * 80}ms` : "0ms",
+                        }}
+                      >
+                        {letter === " " ? "\u00A0" : letter}
+                      </span>
+                    ))}
                   </span>
                 </h1>
               </div>
@@ -143,12 +123,12 @@ export default function Info() {
                       Renell Medrano is a Dominican-American photographer and director from The Bronx, New York, whose work focuses on finding vulnerability in her subjects, drawing inspiration from New York City and her motherland of the Dominican Republic. She graduated from Parsons School of Design | The New School with a degree in Photography. In 2015, she was awarded "New York Times Lens Blog Award" for her photography series 'Untitled Youth', which explored 4 teenage girls living in the Bronx going through adolescence. Her commercial fashion photography has been published in dozens of publications such as Vogue, Elle, Harper's Bazaar, GQ, CR Men, and W.
                     </p>
                   </div>
-                  <span className="hidden md:inline">1998</span>
+                  <span className="hidden md:inline">2000</span>
                 </div>
                 <p className="max-w-[400px]">
                   She has shot campaigns for various brands, including, Burberry, Gucci and Prada. Medrano has had three solo photography exhibitions. Peluca at MILK studios, New York, 2019, Pampara at Gallery Rosenfeld in London in 2020 and Lambon at WSA, New York in 2024. Group shows include 20TK's "The Next Generation of Bronx Photographers," Just Pictures and Aperture Foundation's ground-breaking traveling exhibition, the New Black Vanguard: Photography between Art and Fashion.
                 </p>
-                <span className="md:hidden">1998</span>
+                <span className="md:hidden">2000</span>
               </div>
             </div>
           </div>

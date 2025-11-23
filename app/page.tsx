@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import LoadingScreen from "./components/LoadingScreen";
 import Lightbox from "./components/Lightbox";
 import { edwardianScript } from "./fonts";
 
@@ -95,48 +94,38 @@ const photoOrder = [
 ];
 
 export default function Home() {
-  const [showLoading, setShowLoading] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isOverImage, setIsOverImage] = useState(false);
-  const [displayedText, setDisplayedText] = useState("");
-  const [typingComplete, setTypingComplete] = useState(false);
   const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set());
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [lettersVisible, setLettersVisible] = useState(false);
   const fullText = "Malik Laing";
+  const letters = fullText.split("");
 
-  // Check if loading screen has already been shown
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const hasSeenLoading = sessionStorage.getItem("hasSeenLoading");
-      if (!hasSeenLoading) {
-        setShowLoading(true);
-        sessionStorage.setItem("hasSeenLoading", "true");
-      }
+  // Smooth scroll to gallery
+  const scrollToGallery = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const galleryElement = document.getElementById("overview");
+    if (galleryElement) {
+      const headerHeight = 80; // Account for fixed header
+      const elementPosition = galleryElement.getBoundingClientRect().top;
+      const offsetPosition =
+        elementPosition + window.pageYOffset - headerHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
     }
-  }, []);
+  };
 
-  // Typewriter effect for "Malik Laing"
+  // Trigger letter fade-in animation
   useEffect(() => {
-    let currentIndex = 0;
-    const typingSpeed = 100; // milliseconds per character
-
-    const typeNextChar = () => {
-      if (currentIndex <= fullText.length) {
-        setDisplayedText(fullText.slice(0, currentIndex));
-        currentIndex++;
-        if (currentIndex > fullText.length) {
-          setTypingComplete(true);
-        } else {
-          setTimeout(typeNextChar, typingSpeed);
-        }
-      }
-    };
-
-    // Start typing after a brief delay
-    const initialDelay = setTimeout(typeNextChar, 500);
-
-    return () => clearTimeout(initialDelay);
+    const timer = setTimeout(() => {
+      setLettersVisible(true);
+    }, 500);
+    return () => clearTimeout(timer);
   }, []);
 
   // Intersection Observer for image fade-in
@@ -218,23 +207,12 @@ export default function Home() {
 
   return (
     <>
-      {showLoading && (
-        <LoadingScreen
-          onComplete={() => {
-            setShowLoading(false);
-          }}
-        />
-      )}
       <main
         className={`w-full min-h-screen p-[12px] pb-[48px] flex flex-col gap-[48px] transition-all duration-[1500ms] ${
           scrolled ? "bg-[#0043e0]" : "bg-white"
-        } ${
-          showLoading
-            ? "opacity-0 pointer-events-none"
-            : "opacity-100 pointer-events-auto"
-        }`}
+        } opacity-100 pointer-events-auto`}
         style={{
-          transition: "opacity 0.6s ease-in-out, background-color 1500ms",
+          transition: "background-color 1500ms",
         }}
       >
         {/* Fixed Header */}
@@ -248,37 +226,47 @@ export default function Home() {
                 : "text-[#0043e0]"
             }`}
           >
-            <div className="flex-1">M.L.</div>
+            <div className="flex-1">
+              <a href="/" className="hover:opacity-60">
+                M.L.
+              </a>
+            </div>
             <div className="flex-1 flex justify-between items-start">
               <nav className="flex gap-[12px]">
                 <div>
-                  <a href="#overview" className="hover:opacity-60">
+                  <a
+                    href="#overview"
+                    onClick={scrollToGallery}
+                    className="hover:opacity-60"
+                  >
                     Overview
                   </a>
                 </div>
                 <div>
-                  <a href="#index" className="hover:opacity-60">
-                    Index
+                  <a href="/info" className="hover:opacity-60">
+                    Info
                   </a>
                 </div>
               </nav>
               <div>
-                <a href="/info" className="hover:opacity-60">
-                  Info
+                <a
+                  href="mailto:malikphoto1@gmail.com"
+                  className="hover:opacity-60"
+                >
+                  Contact
                 </a>
               </div>
             </div>
           </div>
         </header>
 
-        <section className="w-full flex flex-col gap-[156px]">
-          <div className="h-[40vh] flex flex-col justify-end relative z-10">
-            <div className="flex gap-[10px] items-end">
+        <section className="w-full flex flex-col gap-[156px] pt-[400px]">
+          <div className="flex flex-col justify-start relative z-10">
+            <div className="flex gap-[10px] items-start">
               {/* Malik Laing container - fills available width */}
               <div className="flex-1">
                 <h1 className="font-bold italic text-[48px] leading-[60%] tracking-[0.0em]">
                   <span
-                    className={`transition-all duration-[1500ms]`}
                     style={{
                       fontFamily: edwardianScript.style.fontFamily,
                       color: "transparent",
@@ -286,10 +274,20 @@ export default function Home() {
                       paintOrder: "stroke fill",
                     }}
                   >
-                    {displayedText}
-                    {!typingComplete && (
-                      <span className="animate-pulse">|</span>
-                    )}
+                    {letters.map((letter, index) => (
+                      <span
+                        key={index}
+                        style={{
+                          opacity: lettersVisible ? 1 : 0,
+                          transition: "opacity 1200ms ease-in-out",
+                          transitionDelay: lettersVisible
+                            ? `${index * 80}ms`
+                            : "0ms",
+                        }}
+                      >
+                        {letter === " " ? "\u00A0" : letter}
+                      </span>
+                    ))}
                   </span>
                 </h1>
               </div>
@@ -302,81 +300,83 @@ export default function Home() {
                 <p className="max-w-[403px]">
                   Photographer and director from San Bernardino, California.
                 </p>
-                <span>1998</span>
+                <span>2000</span>
               </div>
             </div>
           </div>
 
           {/* Gallery Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-[12px] gap-y-[48px] items-end">
-            {projects.map((project, i) => {
-              const columnIndex = i % 6; // 0-5 for 6 columns
-              const isVisible = visibleImages.has(i);
-              const transitionDelay = columnIndex * 150; // 150ms stagger per column for more delay
+          <div id="overview" className="scroll-mt-[80px]">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-[12px] gap-y-[48px] items-end">
+              {projects.map((project, i) => {
+                const columnIndex = i % 6; // 0-5 for 6 columns
+                const isVisible = visibleImages.has(i);
+                const transitionDelay = columnIndex * 150; // 150ms stagger per column for more delay
 
-              return (
-                <div
-                  key={i}
-                  data-image-index={i}
-                  className="flex flex-col gap-[4px] group cursor-pointer"
-                  onClick={() => {
-                    setCurrentImageIndex(i);
-                    setLightboxOpen(true);
-                  }}
-                >
-                  <div className="w-full relative">
-                    <Image
-                      src={project.image}
-                      alt={project.title}
-                      width={800}
-                      height={800}
-                      className="w-full h-auto"
+                return (
+                  <div
+                    key={i}
+                    data-image-index={i}
+                    className="flex flex-col gap-[4px] group cursor-pointer"
+                    onClick={() => {
+                      setCurrentImageIndex(i);
+                      setLightboxOpen(true);
+                    }}
+                  >
+                    <div className="w-full relative">
+                      <Image
+                        src={project.image}
+                        alt={project.title}
+                        width={800}
+                        height={800}
+                        className="w-full h-auto"
+                        style={{
+                          opacity: isVisible ? 1 : 0,
+                          transform: isVisible
+                            ? "scale(1) translateY(0)"
+                            : "scale(0.98) translateY(8px)",
+                          transition:
+                            "opacity 0.8s ease-out, transform 0.8s ease-out",
+                          transitionDelay: isVisible
+                            ? `${transitionDelay}ms`
+                            : "0ms",
+                        }}
+                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                      />
+                    </div>
+                    <div
+                      className="flex flex-col gap-[2px] text-[11px] font-medium leading-none tracking-[0.03em]"
                       style={{
                         opacity: isVisible ? 1 : 0,
                         transform: isVisible
-                          ? "scale(1) translateY(0)"
-                          : "scale(0.98) translateY(8px)",
+                          ? "translateY(0)"
+                          : "translateY(5px)",
                         transition:
-                          "opacity 0.8s ease-out, transform 0.8s ease-out",
+                          "opacity 0.6s ease-out, transform 0.6s ease-out",
                         transitionDelay: isVisible
-                          ? `${transitionDelay}ms`
+                          ? `${transitionDelay + 300}ms`
                           : "0ms",
                       }}
-                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 16vw"
-                    />
-                  </div>
-                  <div
-                    className="flex flex-col gap-[2px] text-[11px] font-medium leading-none tracking-[0.03em]"
-                    style={{
-                      opacity: isVisible ? 1 : 0,
-                      transform: isVisible
-                        ? "translateY(0)"
-                        : "translateY(5px)",
-                      transition:
-                        "opacity 0.6s ease-out, transform 0.6s ease-out",
-                      transitionDelay: isVisible
-                        ? `${transitionDelay + 300}ms`
-                        : "0ms",
-                    }}
-                  >
-                    <span
-                      className={`transition-colors duration-[1500ms] ${
-                        scrolled ? "text-white" : "text-black"
-                      }`}
                     >
-                      {project.title}
-                    </span>
-                    <span
-                      className={`transition-colors duration-[1500ms] ${
-                        scrolled ? "text-[#D0D0D0]" : "text-[#ACACAC]"
-                      }`}
-                    >
-                      {project.description}
-                    </span>
+                      <span
+                        className={`transition-colors duration-[1500ms] ${
+                          scrolled ? "text-white" : "text-black"
+                        }`}
+                      >
+                        {project.title}
+                      </span>
+                      <span
+                        className={`transition-colors duration-[1500ms] ${
+                          scrolled ? "text-[#D0D0D0]" : "text-[#ACACAC]"
+                        }`}
+                      >
+                        {project.description}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </section>
       </main>

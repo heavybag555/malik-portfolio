@@ -43,7 +43,11 @@ export default function NavBar() {
         isOverImage ? "mix-blend-difference text-white" : ""
       }`}
     >
-      <div className="flex-1">M.L.</div>
+      <div className="flex-1">
+        <a href="/" className="hover:opacity-60">
+          M.L.
+        </a>
+      </div>
       <div className="flex-1 flex justify-between items-start">
         <nav className="flex gap-[12px]">
           <div>
@@ -52,12 +56,16 @@ export default function NavBar() {
             </a>
           </div>
           <div>
-            <a href="#index" className="hover:opacity-60">
-              Index
+            <a href="/info" className="hover:opacity-60">
+              Info
             </a>
           </div>
         </nav>
-        <div>Info</div>
+        <div>
+          <a href="mailto:malikphoto1@gmail.com" className="hover:opacity-60">
+            Contact
+          </a>
+        </div>
       </div>
     </header>
   );

@@ -220,13 +220,13 @@ export default function Lightbox({
   const getSlideTransform = () => {
     if (!slideDirection || !isTransitioning)
       return "translate3d(0, 0, 0) scale(1)";
-    const slideAmount = slideDirection === "left" ? "12px" : "-12px";
-    return `translate3d(${slideAmount}, 0, 0) scale(0.99)`;
+    // No transform effects - only opacity changes during transition
+    return "translate3d(0, 0, 0) scale(1)";
   };
 
   const getSlideOpacity = () => {
     if (!slideDirection || !isTransitioning) return 1;
-    return 0.5;
+    return 0;
   };
 
   return (
@@ -260,7 +260,7 @@ export default function Lightbox({
               transform: getSlideTransform(),
               opacity: getSlideOpacity(),
               transition:
-                "transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
               willChange: isTransitioning ? "transform, opacity" : "auto",
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
@@ -269,13 +269,13 @@ export default function Lightbox({
             onClick={(e) => {
               if (isTransitioning) return;
               e.stopPropagation();
-              
+
               // Get the image container's bounding rect
               const imageContainer = e.currentTarget;
               const rect = imageContainer.getBoundingClientRect();
               const clickX = e.clientX;
               const imageCenterX = rect.left + rect.width / 2;
-              
+
               // Navigate based on which side of the image is clicked
               if (clickX < imageCenterX) {
                 handlePrevious();
@@ -313,7 +313,7 @@ export default function Lightbox({
             transform: getSlideTransform(),
             opacity: getSlideOpacity(),
             transition:
-              "transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+              "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
             willChange: isTransitioning ? "transform, opacity" : "auto",
           }}
         >

@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Lightbox from "./components/Lightbox";
-import { edwardianScript } from "./fonts";
 
 // Server-side data fetching moved to a separate function
 const photoOrder = [
@@ -100,7 +99,7 @@ export default function Home() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [lettersVisible, setLettersVisible] = useState(false);
-  const fullText = "Malik Laing";
+  const fullText = "MALIK LAING –";
   const letters = fullText.split("");
 
   // Smooth scroll to gallery
@@ -265,13 +264,13 @@ export default function Home() {
             <div className="flex gap-[10px] items-start">
               {/* Malik Laing container - fills available width */}
               <div className="flex-1">
-                <h1 className="font-bold italic text-[48px] leading-[60%] tracking-[0.0em]">
+                <h1 className="text-[13px] leading-[60%] tracking-[0.01em]">
                   <span
                     style={{
-                      fontFamily: edwardianScript.style.fontFamily,
-                      color: "transparent",
-                      WebkitTextStroke: "0.5px #0043E0",
-                      paintOrder: "stroke fill",
+                      fontFamily:
+                        '"Helvetica Neue", Helvetica, Arial, sans-serif',
+                      color: "#0043E0",
+                      fontWeight: "500",
                     }}
                   >
                     {letters.map((letter, index) => (

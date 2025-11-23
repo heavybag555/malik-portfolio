@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { edwardianScript } from "./fonts";
+import { labMono } from "./fonts";
 
 export const metadata: Metadata = {
   title: "malik laing",
@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${edwardianScript.variable} antialiased`}>{children}</body>
+      <body className={`${labMono.variable} antialiased`}>{children}</body>
     </html>
   );
 }

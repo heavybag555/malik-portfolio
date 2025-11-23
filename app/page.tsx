@@ -382,11 +382,7 @@ export default function Home() {
                         className="w-full h-auto"
                         style={{
                           opacity: isVisible ? 1 : 0,
-                          transform: isVisible
-                            ? "scale(1) translateY(0)"
-                            : "scale(0.98) translateY(8px)",
-                          transition:
-                            "opacity 0.8s ease-out, transform 0.8s ease-out",
+                          transition: "opacity 0.8s ease-out",
                           transitionDelay: isVisible
                             ? `${transitionDelay}ms`
                             : "0ms",
@@ -398,11 +394,7 @@ export default function Home() {
                       className="flex flex-col gap-[2px] text-[11px] font-medium leading-none tracking-[0.03em]"
                       style={{
                         opacity: isVisible ? 1 : 0,
-                        transform: isVisible
-                          ? "translateY(0)"
-                          : "translateY(5px)",
-                        transition:
-                          "opacity 0.6s ease-out, transform 0.6s ease-out",
+                        transition: "opacity 0.6s ease-out",
                         transitionDelay: isVisible
                           ? `${transitionDelay + 300}ms`
                           : "0ms",

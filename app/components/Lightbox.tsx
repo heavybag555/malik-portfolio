@@ -234,18 +234,19 @@ export default function Lightbox({
       className="fixed inset-0 z-100 flex items-center justify-center"
       style={{
         backgroundColor: "rgba(255, 255, 255, 0.97)",
-        cursor: cursorSide === "left" ? "w-resize" : "e-resize",
+        cursor: "default",
         opacity: isOpen ? contentOpacity : 0,
         transition: "opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
-      onClick={handleClick}
+      onClick={onClose}
     >
       <div
         className="lightbox-content flex flex-col items-center gap-[12px] max-w-[90vw] max-h-[90vh] relative"
         style={{
-          cursor: cursorSide === "left" ? "w-resize" : "e-resize",
+          cursor: "default",
           willChange: isTransitioning ? "transform, opacity" : "auto",
         }}
+        onClick={(e) => e.stopPropagation()}
       >
         <div
           className="relative w-full h-auto flex items-center justify-center overflow-hidden"
@@ -265,6 +266,30 @@ export default function Lightbox({
               WebkitBackfaceVisibility: "hidden",
               perspective: "1000px",
             }}
+            onClick={(e) => {
+              if (isTransitioning) return;
+              e.stopPropagation();
+              
+              // Get the image container's bounding rect
+              const imageContainer = e.currentTarget;
+              const rect = imageContainer.getBoundingClientRect();
+              const clickX = e.clientX;
+              const imageCenterX = rect.left + rect.width / 2;
+              
+              // Navigate based on which side of the image is clicked
+              if (clickX < imageCenterX) {
+                handlePrevious();
+              } else {
+                handleNext();
+              }
+            }}
+            onMouseMove={(e) => {
+              // Update cursor based on which side of the image the mouse is over
+              const rect = e.currentTarget.getBoundingClientRect();
+              const mouseX = e.clientX;
+              const imageCenterX = rect.left + rect.width / 2;
+              setCursorSide(mouseX < imageCenterX ? "left" : "right");
+            }}
           >
             <Image
               src={currentProject.image}
@@ -275,6 +300,10 @@ export default function Lightbox({
               priority
               onLoad={handleImageLoad}
               onLoadingComplete={handleImageLoad}
+              style={{
+                cursor: cursorSide === "left" ? "w-resize" : "e-resize",
+                pointerEvents: "none",
+              }}
             />
           </div>
         </div>

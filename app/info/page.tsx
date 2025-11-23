@@ -117,15 +117,15 @@ export default function Info() {
           </div>
         </header>
 
-        <section className="w-full flex flex-col gap-[156px] pt-[400px]">
+        <section className="w-full flex flex-col gap-[156px] pt-[120px]">
           <div className="flex flex-col justify-start relative z-10">
-            <div className="flex flex-col md:flex-row gap-[10px] items-start">
+            <div className="flex flex-col md:flex-row gap-[12px] items-start">
               {/* Malik Laing container - fills available width */}
-              <div className="flex-1 w-full md:w-auto flex flex-row gap-[12px] items-start relative">
+              <div className="flex-[0.5] w-full md:w-auto flex flex-row gap-[12px] items-start relative">
                 {/* Container 1: Image aligned to the left */}
-                <div className="relative">
+                <div className="relative w-full">
                   <div
-                    className="w-[200px] shrink-0 relative"
+                    className="w-full relative"
                     onMouseEnter={() => setIsOverImage(true)}
                     onMouseLeave={() => setIsOverImage(false)}
                     style={{
@@ -146,12 +146,10 @@ export default function Info() {
                     />
                   </div>
                 </div>
-                {/* Container 2: Empty for now */}
-                <div></div>
               </div>
 
               <div
-                className={`flex-1 w-full md:w-auto flex flex-col gap-[12px] text-[17px] font-medium leading-[1.4] tracking-[0.03em] ${
+                className={`flex-1 w-full md:w-auto flex flex-col gap-[12px] text-[30px] font-semibold leading-[1.1] tracking-[-0.01em] ${
                   scrolled ? "text-white" : "text-[#0043e0]"
                 }`}
                 style={{
@@ -161,37 +159,33 @@ export default function Info() {
               >
                 {/* Container 1: Text content */}
                 <div className="flex flex-col gap-[12px]">
-                  <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-[12px] md:gap-0">
-                    <div className="flex-1">
-                      <p className="max-w-[500px]">
-                        Renell Medrano is a Dominican-American photographer and
-                        director from The Bronx, New York, whose work focuses on
-                        finding vulnerability in her subjects, drawing
-                        inspiration from New York City and her motherland of the
-                        Dominican Republic. She graduated from Parsons School of
-                        Design | The New School with a degree in Photography. In
-                        2015, she was awarded "New York Times Lens Blog Award"
-                        for her photography series 'Untitled Youth', which
-                        explored 4 teenage girls living in the Bronx going
-                        through adolescence. Her commercial fashion photography
-                        has been published in dozens of publications such as
-                        Vogue, Elle, Harper's Bazaar, GQ, CR Men, and W.
+                  <div className="flex flex-col md:flex-row md:items-start gap-[12px]">
+                    <div className="flex-1 flex flex-col gap-[24px]">
+                      <p>
+                        Malik Laing [b. 2000] is an independent photographer
+                        hailing from San Bernardino, California.
+                      </p>
+                      <p>
+                        For years, he has been enveloped in the world of
+                        photography, inside and out. His lengthiest project, the
+                        community photography space Eclipse is a testament to
+                        the communal and personal themes in his work. Some of
+                        his material has been publicly featured at the Riverside
+                        Art Museum and alongside The Civil Rights Institute of
+                        Southern California.
+                      </p>
+                      <p>
+                        <a
+                          href="https://www.instagram.com/maliklphoto/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:opacity-60"
+                        >
+                          @maliklphoto
+                        </a>
                       </p>
                     </div>
-                    <span className="hidden md:inline text-[13px]">2000</span>
                   </div>
-                  <p className="max-w-[500px]">
-                    She has shot campaigns for various brands, including,
-                    Burberry, Gucci and Prada. Medrano has had three solo
-                    photography exhibitions. Peluca at MILK studios, New York,
-                    2019, Pampara at Gallery Rosenfeld in London in 2020 and
-                    Lambon at WSA, New York in 2024. Group shows include 20TK's
-                    "The Next Generation of Bronx Photographers," Just Pictures
-                    and Aperture Foundation's ground-breaking traveling
-                    exhibition, the New Black Vanguard: Photography between Art
-                    and Fashion.
-                  </p>
-                  <span className="md:hidden text-[13px]">2000</span>
                 </div>
                 {/* Container 2: Empty for now */}
                 <div></div>

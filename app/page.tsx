@@ -115,7 +115,8 @@ export default function Home() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [lettersVisible, setLettersVisible] = useState(false);
-  const fullText = "MALIK LAING ⋅";
+  const [columns, setColumns] = useState(4);
+  const fullText = "Malik Laing ⋅";
   const letters = fullText.split("");
 
   // Smooth scroll to gallery
@@ -167,6 +168,24 @@ export default function Home() {
     imageElements.forEach((el) => observer.observe(el));
 
     return () => observer.disconnect();
+  }, []);
+
+  // Update columns based on screen size
+  useEffect(() => {
+    const updateColumns = () => {
+      const width = window.innerWidth;
+      if (width < 768) {
+        setColumns(2); // Mobile: 2 columns
+      } else if (width < 1024) {
+        setColumns(3); // Tablet: 3 columns
+      } else {
+        setColumns(4); // Desktop: 4 columns
+      }
+    };
+
+    updateColumns();
+    window.addEventListener("resize", updateColumns);
+    return () => window.removeEventListener("resize", updateColumns);
   }, []);
 
   useEffect(() => {
@@ -222,7 +241,7 @@ export default function Home() {
       id: i + 1,
       title: metadata?.title || `Project ${i + 1}`,
       description: metadata?.description || "Description",
-      image: `/ML-photos/${encodeURIComponent(file)}`,
+      image: `/ML-photos/${file}`,
     };
   });
 
@@ -291,7 +310,7 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="w-full flex flex-col gap-[156px] pt-[400px]">
+        <section className="w-full flex flex-col gap-[0px] pt-[120px]">
           <div className="flex flex-col justify-start relative z-10">
             <div className="flex gap-[10px] items-start">
               {/* Malik Laing container - fills available width */}
@@ -338,9 +357,9 @@ export default function Home() {
 
           {/* Gallery Grid */}
           <div id="overview" className="scroll-mt-[80px]">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-[12px] gap-y-[48px] items-end">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-[24px] md:gap-x-[48px] lg:gap-x-[96px] gap-y-[48px] items-end">
               {projects.map((project, i) => {
-                const columnIndex = i % 6; // 0-5 for 6 columns
+                const columnIndex = i % columns; // Dynamic based on screen size
                 const isVisible = visibleImages.has(i);
                 const transitionDelay = columnIndex * 150; // 150ms stagger per column for more delay
 
@@ -372,7 +391,7 @@ export default function Home() {
                             ? `${transitionDelay}ms`
                             : "0ms",
                         }}
-                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       />
                     </div>
                     <div

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Lightbox from "./components/Lightbox";
+import photoMetadata from "./photoMetadata.json";
 
 // Server-side data fetching moved to a separate function
 const photoOrder = [
@@ -90,6 +91,21 @@ const photoOrder = [
   "0F4A3254.jpg",
   "000050880027.jpg",
   "Photo Nov 21 2025, 8 25 53 AM (1).jpg",
+  "Photo Nov 21 2025, 11 07 07 PM (1).jpg",
+  "Photo Nov 21 2025, 11 07 07 PM (2).jpg",
+  "Photo Nov 21 2025, 11 07 07 PM (3).jpg",
+  "Photo Nov 21 2025, 11 07 07 PM (4).jpg",
+  "Photo Nov 21 2025, 11 07 07 PM (5).jpg",
+  "Photo Nov 21 2025, 11 07 07 PM (6).jpg",
+  "Photo Nov 22 2025, 2 16 16 PM (1).jpg",
+  "Photo Nov 22 2025, 2 16 16 PM.jpg",
+  "Photo Nov 22 2025, 6 30 13 PM (1).jpg",
+  "Photo Nov 22 2025, 6 30 13 PM (2).jpg",
+  "Photo Nov 22 2025, 6 30 13 PM (3).jpg",
+  "Photo Nov 22 2025, 6 30 13 PM (5).jpg",
+  "Photo Nov 22 2025, 6 30 13 PM (6).jpg",
+  "Photo Nov 22 2025, 6 30 13 PM (7).jpg",
+  "Photo Nov 22 2025, 6 30 13 PM.jpg",
 ];
 
 export default function Home() {
@@ -99,7 +115,7 @@ export default function Home() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [lettersVisible, setLettersVisible] = useState(false);
-  const fullText = "MALIK LAING –";
+  const fullText = "MALIK LAING ⋅";
   const letters = fullText.split("");
 
   // Smooth scroll to gallery
@@ -195,11 +211,17 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Create a lookup map for metadata by filename
+  const metadataMap = new Map(
+    photoMetadata.map((meta) => [meta.filename, meta])
+  );
+
   const projects = photoOrder.map((file, i) => {
+    const metadata = metadataMap.get(file);
     return {
       id: i + 1,
-      title: `Project ${i + 1}`,
-      description: "Description",
+      title: metadata?.title || `Project ${i + 1}`,
+      description: metadata?.description || "Description",
       image: `/ML-photos/${encodeURIComponent(file)}`,
     };
   });
@@ -208,7 +230,7 @@ export default function Home() {
     <>
       <main
         className={`w-full min-h-screen p-[12px] pb-[48px] flex flex-col gap-[48px] transition-all duration-[1500ms] ${
-          scrolled ? "bg-[#0043e0]" : "bg-white"
+          scrolled ? "bg-[#0043e0]/98" : "bg-white"
         } opacity-100 pointer-events-auto`}
         style={{
           transition: "background-color 1500ms",
@@ -242,7 +264,17 @@ export default function Home() {
                   </a>
                 </div>
                 <div>
-                  <a href="/info" className="hover:opacity-60">
+                  <a
+                    href="/info"
+                    className="hover:opacity-60"
+                    onClick={(e) => {
+                      // Save current scroll position before navigation
+                      sessionStorage.setItem(
+                        "homeScrollPosition",
+                        window.scrollY.toString()
+                      );
+                    }}
+                  >
                     Info
                   </a>
                 </div>

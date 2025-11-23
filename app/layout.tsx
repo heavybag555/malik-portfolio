@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { labMono } from "./fonts";
+import OverlayWrapper from "./OverlayWrapper";
 
 export const metadata: Metadata = {
   title: "malik laing",
@@ -14,7 +15,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${labMono.variable} antialiased`}>{children}</body>
+      <head>
+        <link
+          rel="preload"
+          href="/malik-info.jpg"
+          as="image"
+          type="image/jpeg"
+        />
+      </head>
+      <body className={`${labMono.variable} antialiased`}>
+        <OverlayWrapper>{children}</OverlayWrapper>
+      </body>
     </html>
   );
 }

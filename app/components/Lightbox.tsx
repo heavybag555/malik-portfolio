@@ -546,7 +546,6 @@ export default function Lightbox({
               style={{
                 pointerEvents: "none",
                 transform: "translateZ(0)",
-                imageRendering: "high-quality",
               }}
             />
           </div>

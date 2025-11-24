@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Lightbox from "./components/Lightbox";
 import CustomCursor from "./components/CustomCursor";
 import photoMetadata from "./photoMetadata.json";
+import { useIsDesktop } from "./hooks/useIsDesktop";
 
 // Server-side data fetching moved to a separate function
 const photoOrder = [
@@ -110,6 +111,7 @@ const photoOrder = [
 ];
 
 export default function Home() {
+  const isDesktop = useIsDesktop();
   const [scrolled, setScrolled] = useState(false);
   const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set());
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -232,7 +234,9 @@ export default function Home() {
 
   return (
     <>
-      <CustomCursor scrolled={scrolled} lightboxOpen={lightboxOpen} cursorSide={lightboxCursorSide} isOverLightboxImage={isOverLightboxImage} />
+      {isDesktop && (
+        <CustomCursor scrolled={scrolled} lightboxOpen={lightboxOpen} cursorSide={lightboxCursorSide} isOverLightboxImage={isOverLightboxImage} />
+      )}
       <main
         className={`w-full min-h-screen p-[12px] pb-[48px] flex flex-col gap-[48px] transition-all duration-[1500ms] ${
           scrolled ? "bg-[#0043e0]/98" : "bg-white"
@@ -428,8 +432,8 @@ export default function Home() {
         onNavigate={(index) => setCurrentImageIndex(index)}
         scrolled={scrolled}
         initialImagePosition={initialImagePosition}
-        onCursorSideChange={setLightboxCursorSide}
-        onImageHoverChange={setIsOverLightboxImage}
+        onCursorSideChange={isDesktop ? setLightboxCursorSide : undefined}
+        onImageHoverChange={isDesktop ? setIsOverLightboxImage : undefined}
       />
     </>
   );

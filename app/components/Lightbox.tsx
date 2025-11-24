@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
+import { useIsDesktop } from "../hooks/useIsDesktop";
 
 interface Project {
   id: number;
@@ -40,6 +41,7 @@ export default function Lightbox({
   onCursorSideChange,
   onImageHoverChange,
 }: LightboxProps) {
+  const isDesktop = useIsDesktop();
   const [mouseX, setMouseX] = useState(0);
   const [cursorSide, setCursorSide] = useState<"left" | "right">("right");
   const [isOverImage, setIsOverImage] = useState(false);
@@ -148,9 +150,9 @@ export default function Lightbox({
     preloadImage(images[next2Index]?.image);
   }, [isOpen, currentIndex, images]);
 
-  // Track mouse position
+  // Track mouse position (only on desktop)
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || !isDesktop) {
       return;
     }
 
@@ -169,7 +171,7 @@ export default function Lightbox({
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [isOpen, onCursorSideChange]);
+  }, [isOpen, isDesktop, onCursorSideChange]);
 
   // Handle keyboard events
   useEffect(() => {
@@ -518,21 +520,27 @@ export default function Lightbox({
               }
             }}
             onMouseEnter={() => {
-              setIsOverImage(true);
-              onImageHoverChange?.(true);
+              if (isDesktop) {
+                setIsOverImage(true);
+                onImageHoverChange?.(true);
+              }
             }}
             onMouseLeave={() => {
-              setIsOverImage(false);
-              onImageHoverChange?.(false);
+              if (isDesktop) {
+                setIsOverImage(false);
+                onImageHoverChange?.(false);
+              }
             }}
             onMouseMove={(e) => {
-              // Update cursor based on which side of the image the mouse is over
-              const rect = e.currentTarget.getBoundingClientRect();
-              const mouseX = e.clientX;
-              const imageCenterX = rect.left + rect.width / 2;
-              const newSide = mouseX < imageCenterX ? "left" : "right";
-              setCursorSide(newSide);
-              onCursorSideChange?.(newSide);
+              // Update cursor based on which side of the image the mouse is over (only on desktop)
+              if (isDesktop) {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const mouseX = e.clientX;
+                const imageCenterX = rect.left + rect.width / 2;
+                const newSide = mouseX < imageCenterX ? "left" : "right";
+                setCursorSide(newSide);
+                onCursorSideChange?.(newSide);
+              }
             }}
           >
             <Image

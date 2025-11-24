@@ -286,7 +286,7 @@ export default function Home() {
               </nav>
               <div>
                 <a
-                  href="mailto:malikphoto1@gmail.com"
+                  href="mailto:Maliklphoto1@gmail.com"
                   className="hover:opacity-60"
                 >
                   Contact

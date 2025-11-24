@@ -48,7 +48,7 @@ export default function NavBar() {
           </div>
         </nav>
         <div>
-          <a href="mailto:malikphoto1@gmail.com" className="hover:opacity-60">
+          <a href="mailto:Maliklphoto1@gmail.com" className="hover:opacity-60">
             Contact
           </a>
         </div>

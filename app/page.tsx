@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Lightbox from "./components/Lightbox";
+import CustomCursor from "./components/CustomCursor";
 import photoMetadata from "./photoMetadata.json";
 
 // Server-side data fetching moved to a separate function
@@ -114,8 +115,16 @@ export default function Home() {
   const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set());
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [initialImagePosition, setInitialImagePosition] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
   const [lettersVisible, setLettersVisible] = useState(false);
   const [columns, setColumns] = useState(4);
+  const [lightboxCursorSide, setLightboxCursorSide] = useState<"left" | "right">("right");
+  const [isOverLightboxImage, setIsOverLightboxImage] = useState(false);
   const fullText = "Malik Laing ⋅";
   const letters = fullText.split("");
 
@@ -230,6 +239,7 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+
   // Create a lookup map for metadata by filename
   const metadataMap = new Map(
     photoMetadata.map((meta) => [meta.filename, meta])
@@ -247,6 +257,7 @@ export default function Home() {
 
   return (
     <>
+      <CustomCursor scrolled={scrolled} lightboxOpen={lightboxOpen} cursorSide={lightboxCursorSide} isOverLightboxImage={isOverLightboxImage} />
       <main
         className={`w-full min-h-screen p-[12px] pb-[48px] flex flex-col gap-[48px] transition-all duration-[1500ms] ${
           scrolled ? "bg-[#0043e0]/98" : "bg-white"
@@ -361,14 +372,25 @@ export default function Home() {
               {projects.map((project, i) => {
                 const columnIndex = i % columns; // Dynamic based on screen size
                 const isVisible = visibleImages.has(i);
-                const transitionDelay = columnIndex * 150; // 150ms stagger per column for more delay
+                const transitionDelay = columnIndex * 100; // 100ms stagger per column for smoother reveal
 
                 return (
                   <div
                     key={i}
                     data-image-index={i}
                     className="flex flex-col gap-[4px] group cursor-pointer"
-                    onClick={() => {
+                    onClick={(e) => {
+                      // Capture the image element's position before opening lightbox
+                      const imageElement = e.currentTarget.querySelector("img");
+                      if (imageElement) {
+                        const rect = imageElement.getBoundingClientRect();
+                        setInitialImagePosition({
+                          x: rect.left + rect.width / 2,
+                          y: rect.top + rect.height / 2,
+                          width: rect.width,
+                          height: rect.height,
+                        });
+                      }
                       setCurrentImageIndex(i);
                       setLightboxOpen(true);
                     }}
@@ -382,7 +404,7 @@ export default function Home() {
                         className="w-full h-auto"
                         style={{
                           opacity: isVisible ? 1 : 0,
-                          transition: "opacity 0.8s ease-out",
+                          transition: "opacity 1.6s cubic-bezier(0.4, 0, 0.2, 1)",
                           transitionDelay: isVisible
                             ? `${transitionDelay}ms`
                             : "0ms",
@@ -394,9 +416,9 @@ export default function Home() {
                       className="flex flex-col gap-[2px] text-[11px] font-medium leading-none tracking-[0.03em]"
                       style={{
                         opacity: isVisible ? 1 : 0,
-                        transition: "opacity 0.6s ease-out",
+                        transition: "opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1)",
                         transitionDelay: isVisible
-                          ? `${transitionDelay + 300}ms`
+                          ? `${transitionDelay + 200}ms`
                           : "0ms",
                       }}
                     >
@@ -426,9 +448,17 @@ export default function Home() {
         isOpen={lightboxOpen}
         currentIndex={currentImageIndex}
         images={projects}
-        onClose={() => setLightboxOpen(false)}
+        onClose={() => {
+          setLightboxOpen(false);
+          setIsOverLightboxImage(false);
+          // Clear position after close animation completes
+          setTimeout(() => setInitialImagePosition(null), 300);
+        }}
         onNavigate={(index) => setCurrentImageIndex(index)}
         scrolled={scrolled}
+        initialImagePosition={initialImagePosition}
+        onCursorSideChange={setLightboxCursorSide}
+        onImageHoverChange={setIsOverLightboxImage}
       />
     </>
   );

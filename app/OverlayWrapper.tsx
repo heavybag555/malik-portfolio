@@ -1,8 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
-import Home from "./page";
+import { useEffect, useRef, useState } from "react";
 
 export default function OverlayWrapper({
   children,
@@ -12,15 +11,23 @@ export default function OverlayWrapper({
   const pathname = usePathname();
   const isInfoPage = pathname === "/info";
   const backgroundContainerRef = useRef<HTMLDivElement>(null);
+  const [HomeComponent, setHomeComponent] = useState<React.ComponentType | null>(null);
 
   useEffect(() => {
-    if (isInfoPage && backgroundContainerRef.current) {
-      // Get saved scroll position from sessionStorage
-      const savedScrollPosition = sessionStorage.getItem("homeScrollPosition");
-      if (savedScrollPosition) {
-        const scrollY = parseInt(savedScrollPosition, 10);
-        // Apply scroll position to the background container
-        backgroundContainerRef.current.scrollTop = scrollY;
+    if (isInfoPage) {
+      // Dynamically import the Home component to avoid circular dependency
+      import("./page").then((module) => {
+        setHomeComponent(() => module.default);
+      });
+      
+      if (backgroundContainerRef.current) {
+        // Get saved scroll position from sessionStorage
+        const savedScrollPosition = sessionStorage.getItem("homeScrollPosition");
+        if (savedScrollPosition) {
+          const scrollY = parseInt(savedScrollPosition, 10);
+          // Apply scroll position to the background container
+          backgroundContainerRef.current.scrollTop = scrollY;
+        }
       }
     }
   }, [isInfoPage]);
@@ -36,7 +43,7 @@ export default function OverlayWrapper({
           }}
         >
           <div className="pointer-events-none">
-            <Home />
+            {HomeComponent && <HomeComponent />}
           </div>
         </div>
         <div className="relative z-[100]">

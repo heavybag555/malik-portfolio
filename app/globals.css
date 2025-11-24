@@ -24,4 +24,28 @@ body {
   letter-spacing: 0.03em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  cursor: none;
+}
+
+* {
+  cursor: none !important;
+}
+
+/* Custom cursor - blue dot for white background */
+.cursor-blue-dot {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='5' fill='%230043e0'/%3E%3C/svg%3E") 8 8, auto;
+}
+
+/* Custom cursor - white dot for blue background */
+.cursor-white-dot {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='5' fill='white'/%3E%3C/svg%3E") 8 8, auto;
+}
+
+/* Lightbox image transition optimizations */
+.lightbox-content img {
+  image-rendering: high-quality;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }

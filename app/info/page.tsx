@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
+import CustomCursor from "../components/CustomCursor";
 
 export default function Info() {
   const [scrolled, setScrolled] = useState(false);
@@ -63,8 +64,10 @@ export default function Info() {
     return () => container.removeEventListener("scroll", handleScroll);
   }, []);
 
+
   return (
     <>
+      <CustomCursor scrolled={scrolled} />
       <main
         ref={mainRef}
         className="fixed inset-0 w-full h-full overflow-y-auto p-[12px] pb-[48px] flex flex-col gap-[48px] pointer-events-auto z-[100]"

@@ -409,6 +409,7 @@ export default function Lightbox({
   if (!isVisible) return null;
 
   const currentProject = images[currentIndex];
+  const previousProject = previousIndex !== null ? images[previousIndex] : null;
 
   // Calculate opacity for cross-fade transition
   // Using CSS transitions for smoother GPU-accelerated animations
@@ -551,28 +552,72 @@ export default function Lightbox({
           </div>
         </div>
         <div
-          className="flex flex-col gap-[2px] text-[11px] font-medium leading-none tracking-[0.03em] text-center"
+          className="relative flex flex-col gap-[2px] text-[11px] font-medium leading-none tracking-[0.03em] text-center min-h-[32px]"
           style={{
-            opacity: getImageOpacity(true),
-            transition: "opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-            willChange: isTransitioning ? "opacity" : "auto",
+            contain: "layout style paint",
             transform: "translateZ(0)",
           }}
         >
-          <span
-            className={`transition-colors duration-1500 ${
-              scrolled ? "text-black" : "text-black"
-            }`}
+          {/* Previous text (during transition) */}
+          {previousProject && previousIndex !== null && isTransitioning && (
+            <div
+              className="absolute inset-0 flex flex-col gap-[2px]"
+              style={{
+                opacity: getImageOpacity(false),
+                willChange: "opacity",
+                pointerEvents: "none",
+                zIndex: 1,
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
+                transform: "translateZ(0)",
+                transition: "opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+            >
+              <span
+                className={`transition-colors duration-1500 ${
+                  scrolled ? "text-black" : "text-black"
+                }`}
+              >
+                {previousProject.title}
+              </span>
+              <span
+                className={`transition-colors duration-1500 ${
+                  scrolled ? "text-[#666666]" : "text-[#666666]"
+                }`}
+              >
+                {previousProject.description}
+              </span>
+            </div>
+          )}
+          
+          {/* Current text */}
+          <div
+            className="relative flex flex-col gap-[2px]"
+            style={{
+              opacity: getImageOpacity(true),
+              willChange: isTransitioning ? "opacity" : "auto",
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+              transform: "translateZ(0)",
+              zIndex: 2,
+              transition: isTransitioning ? "opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)" : "none",
+            }}
           >
-            {currentProject.title}
-          </span>
-          <span
-            className={`transition-colors duration-1500 ${
-              scrolled ? "text-[#666666]" : "text-[#666666]"
-            }`}
-          >
-            {currentProject.description}
-          </span>
+            <span
+              className={`transition-colors duration-1500 ${
+                scrolled ? "text-black" : "text-black"
+              }`}
+            >
+              {currentProject.title}
+            </span>
+            <span
+              className={`transition-colors duration-1500 ${
+                scrolled ? "text-[#666666]" : "text-[#666666]"
+              }`}
+            >
+              {currentProject.description}
+            </span>
+          </div>
         </div>
       </div>
     </div>

@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import CustomCursor from "../components/CustomCursor";
 import { useIsDesktop } from "../hooks/useIsDesktop";
 
 export default function Info() {
@@ -69,7 +68,6 @@ export default function Info() {
 
   return (
     <>
-      {isDesktop && <CustomCursor scrolled={scrolled} />}
       <main
         ref={mainRef}
         className="fixed inset-0 w-full h-full overflow-y-auto p-[12px] pb-[48px] flex flex-col gap-[48px] pointer-events-auto z-[100]"

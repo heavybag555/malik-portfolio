@@ -234,7 +234,7 @@ export default function Home() {
 
   return (
     <>
-      {isDesktop && (
+      {isDesktop && lightboxOpen && (
         <CustomCursor scrolled={scrolled} lightboxOpen={lightboxOpen} cursorSide={lightboxCursorSide} isOverLightboxImage={isOverLightboxImage} />
       )}
       <main

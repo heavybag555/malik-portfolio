@@ -12,7 +12,8 @@ interface CustomCursorProps {
 export default function CustomCursor({ scrolled, lightboxOpen = false, cursorSide = "right", isOverLightboxImage = false }: CustomCursorProps) {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(true);
-  const [cursorType, setCursorType] = useState<"dot" | "arrow">("dot");
+  // Initialize cursor type based on lightbox state to prevent flash
+  const [cursorType, setCursorType] = useState<"dot" | "arrow">(lightboxOpen ? "arrow" : "dot");
   const animationFrameRef = useRef<number | null>(null);
   const mousePositionRef = useRef({ x: 0, y: 0 });
   const isMountedRef = useRef(true);

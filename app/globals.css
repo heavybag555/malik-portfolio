@@ -24,11 +24,6 @@ body {
   letter-spacing: 0.03em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  cursor: none;
-}
-
-* {
-  cursor: none !important;
 }
 
 /* Custom cursor - blue dot for white background */

@@ -20,10 +20,26 @@ export default function CustomCursor({ scrolled, lightboxOpen = false, cursorSid
   useEffect(() => {
     isMountedRef.current = true;
     
-    // Initialize cursor position immediately
+    // Initialize cursor position - use saved position if available, otherwise use current mouse position or center
     if (typeof window !== "undefined") {
-      const initialX = window.innerWidth / 2;
-      const initialY = window.innerHeight / 2;
+      // Try to get saved cursor position from sessionStorage
+      const savedPosition = sessionStorage.getItem("cursorPosition");
+      let initialX = window.innerWidth / 2;
+      let initialY = window.innerHeight / 2;
+      
+      if (savedPosition) {
+        try {
+          const { x, y } = JSON.parse(savedPosition);
+          // Validate saved position is within viewport bounds
+          if (x >= 0 && x <= window.innerWidth && y >= 0 && y <= window.innerHeight) {
+            initialX = x;
+            initialY = y;
+          }
+        } catch (e) {
+          // If parsing fails, use center
+        }
+      }
+      
       mousePositionRef.current = { x: initialX, y: initialY };
       setCursorPosition({ x: initialX, y: initialY });
       setIsVisible(true);
@@ -32,6 +48,12 @@ export default function CustomCursor({ scrolled, lightboxOpen = false, cursorSid
     const handleMouseMove = (e: MouseEvent) => {
       if (!isMountedRef.current) return;
       mousePositionRef.current = { x: e.clientX, y: e.clientY };
+      // Save cursor position to sessionStorage for persistence across page navigations
+      try {
+        sessionStorage.setItem("cursorPosition", JSON.stringify({ x: e.clientX, y: e.clientY }));
+      } catch (e) {
+        // Ignore storage errors (e.g., in private browsing)
+      }
       setIsVisible(true);
     };
 
@@ -43,13 +65,31 @@ export default function CustomCursor({ scrolled, lightboxOpen = false, cursorSid
       setIsVisible(false);
     };
 
+    // Handle viewport resize - update saved position if viewport changes significantly
+    const handleResize = () => {
+      if (typeof window !== "undefined" && mousePositionRef.current) {
+        const { x, y } = mousePositionRef.current;
+        // Clamp position to new viewport bounds
+        const clampedX = Math.max(0, Math.min(x, window.innerWidth));
+        const clampedY = Math.max(0, Math.min(y, window.innerHeight));
+        mousePositionRef.current = { x: clampedX, y: clampedY };
+        try {
+          sessionStorage.setItem("cursorPosition", JSON.stringify({ x: clampedX, y: clampedY }));
+        } catch (e) {
+          // Ignore storage errors
+        }
+      }
+    };
+
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("resize", handleResize);
     document.addEventListener("mouseenter", handleMouseEnter);
     document.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
       isMountedRef.current = false;
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("resize", handleResize);
       document.removeEventListener("mouseenter", handleMouseEnter);
       document.removeEventListener("mouseleave", handleMouseLeave);
       if (animationFrameRef.current) {

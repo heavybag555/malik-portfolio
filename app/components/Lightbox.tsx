@@ -55,12 +55,21 @@ export default function Lightbox({
   const [isMorphing, setIsMorphing] = useState(false);
   const [previousIndex, setPreviousIndex] = useState<number | null>(null);
   const [transitionProgress, setTransitionProgress] = useState(0);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const prevIndexRef = useRef(currentIndex);
   const imageLoadedRef = useRef(false);
   const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const preloadedImagesRef = useRef<Set<string>>(new Set());
   const imageLoadPromisesRef = useRef<Map<string, Promise<void>>>(new Map());
+
+  // Reset image loaded state when index changes
+  useEffect(() => {
+    if (currentIndex !== prevIndexRef.current) {
+      setIsImageLoaded(false);
+      imageLoadedRef.current = false;
+    }
+  }, [currentIndex]);
 
   const handlePrevious = () => {
     // Allow navigation even during transitions, but clear any pending transition
@@ -100,6 +109,7 @@ export default function Lightbox({
       setSlideDirection(null);
       setPreviousIndex(null);
       setTransitionProgress(0);
+      setIsImageLoaded(false);
     }
   }, [isOpen, currentIndex]);
 
@@ -320,9 +330,8 @@ export default function Lightbox({
       setIsTransitioning(true);
       setTransitionProgress(0); // Start with previous visible, new hidden
       
-      // Use CSS transition timing (250ms) for smooth fade
-      // This matches the CSS transition duration exactly
-      const duration = 250;
+      // Use CSS transition timing (500ms) for smooth bouncy fade
+      const duration = 500;
 
       // Use double RAF to ensure initial state is painted before transition
       // This ensures CSS transition can properly animate the opacity change
@@ -401,34 +410,109 @@ export default function Lightbox({
   const handleImageLoad = () => {
     // Mark image as loaded
     imageLoadedRef.current = true;
+    setIsImageLoaded(true);
   };
 
   // Reset image loaded state when image changes
   useEffect(() => {
     imageLoadedRef.current = false;
+    // We don't reset isImageLoaded here because it's handled in the other effect
+    // and we want to preserve it during the render phase before transition
   }, [currentIndex]);
 
   if (!isVisible) return null;
 
-  const currentProject = images[currentIndex];
+  // Use the previous index if we are in a "pending" state (prop changed but effect hasn't run)
+  // This prevents the text/image from changing before the transition starts
+  const effectiveIndex = (isOpen && currentIndex !== prevIndexRef.current) ? prevIndexRef.current : currentIndex;
+  const currentProject = images[effectiveIndex];
   const previousProject = previousIndex !== null ? images[previousIndex] : null;
 
-  // Calculate opacity for cross-fade transition
-  // Using CSS transitions for smoother GPU-accelerated animations
-  const getImageOpacity = (isCurrent: boolean) => {
+  // Bouncy bezier curve
+  const BOUNCE_EASE = "cubic-bezier(0.34, 1.56, 0.64, 1)";
+  const TRANSITION_DURATION = "0.5s";
+
+  // Calculate styles for cross-fade transition with bounce
+  const getImageStyle = (isCurrent: boolean) => {
+    const baseStyle = {
+      backfaceVisibility: "hidden" as const,
+      WebkitBackfaceVisibility: "hidden",
+      transform: "translateZ(0)",
+      transition: isTransitioning 
+        ? `opacity ${TRANSITION_DURATION} ease-in-out, transform ${TRANSITION_DURATION} ${BOUNCE_EASE}, filter ${TRANSITION_DURATION} ease-out` 
+        : `filter 0.5s ease-out`,
+    };
+
     if (!isTransitioning) {
-      return isCurrent ? 1 : 0;
+      // Static state
+      return {
+        ...baseStyle,
+        opacity: isCurrent ? 1 : 0,
+        transform: "translateZ(0) scale(1)",
+        filter: isCurrent && !isImageLoaded ? "blur(20px)" : "blur(0px)",
+      };
     }
     
-    // During transition, CSS handles the smooth fade
-    // transitionProgress starts at 0, then becomes 1
-    // CSS transition animates the opacity change smoothly
+    // During transition
     if (isCurrent) {
-      // New image: starts at 0, transitions to 1 when progress > 0
-      return transitionProgress > 0 ? 1 : 0;
+      // Incoming image
+      // Starts at opacity 0, scale 0.9, blur 20px
+      // Ends at opacity 1, scale 1, blur 0px
+      const isTargetState = transitionProgress > 0;
+      return {
+        ...baseStyle,
+        opacity: isTargetState ? 1 : 0,
+        transform: isTargetState ? "translateZ(0) scale(1)" : "translateZ(0) scale(0.95)",
+        filter: isTargetState && isImageLoaded ? "blur(0px)" : "blur(20px)",
+      };
     } else {
-      // Previous image: starts at 1, transitions to 0 when progress > 0
-      return transitionProgress > 0 ? 0 : 1;
+      // Outgoing image
+      // Starts at opacity 1, scale 1
+      // Ends at opacity 0, scale 1.05
+      const isTargetState = transitionProgress > 0;
+      return {
+        ...baseStyle,
+        opacity: isTargetState ? 0 : 1,
+        transform: isTargetState ? "translateZ(0) scale(1.05)" : "translateZ(0) scale(1)",
+        filter: "blur(0px)", // Don't blur outgoing
+      };
+    }
+  };
+  
+  const getTextStyle = (isCurrent: boolean) => {
+    const baseStyle = {
+      backfaceVisibility: "hidden" as const,
+      WebkitBackfaceVisibility: "hidden",
+      transform: "translateZ(0)",
+      transition: isTransitioning 
+        ? `opacity ${TRANSITION_DURATION} ease-in-out, transform ${TRANSITION_DURATION} ${BOUNCE_EASE}`
+        : "none",
+    };
+
+    if (!isTransitioning) {
+      return {
+        ...baseStyle,
+        opacity: isCurrent ? 1 : 0,
+        transform: "translateZ(0) translateY(0)",
+      };
+    }
+
+    if (isCurrent) {
+      // Incoming text: Slide up + Fade in
+      const isTargetState = transitionProgress > 0;
+      return {
+        ...baseStyle,
+        opacity: isTargetState ? 1 : 0,
+        transform: isTargetState ? "translateZ(0) translateY(0)" : "translateZ(0) translateY(10px)",
+      };
+    } else {
+      // Outgoing text: Slide up + Fade out
+      const isTargetState = transitionProgress > 0;
+      return {
+        ...baseStyle,
+        opacity: isTargetState ? 0 : 1,
+        transform: isTargetState ? "translateZ(0) translateY(-10px)" : "translateZ(0) translateY(0)",
+      };
     }
   };
 
@@ -467,14 +551,9 @@ export default function Lightbox({
             <div
               className="absolute inset-0 flex items-center justify-center p-[12px]"
               style={{
-                opacity: getImageOpacity(false),
-                willChange: "opacity",
-                pointerEvents: "none",
+                ...getImageStyle(false),
                 zIndex: 1,
-                backfaceVisibility: "hidden",
-                WebkitBackfaceVisibility: "hidden",
-                transform: "translateZ(0)",
-                transition: "opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                pointerEvents: "none",
               }}
             >
               <Image
@@ -495,13 +574,9 @@ export default function Lightbox({
           <div
             className="relative p-[12px]"
             style={{
-              opacity: getImageOpacity(true),
-              willChange: isTransitioning ? "opacity" : "auto",
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
-              transform: "translateZ(0)",
+              ...getImageStyle(true),
+              willChange: isTransitioning ? "opacity, transform, filter" : "auto",
               zIndex: 2,
-              transition: isTransitioning ? "opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)" : "none",
             }}
             onClick={(e) => {
               e.stopPropagation();
@@ -571,14 +646,9 @@ export default function Lightbox({
             <div
               className="absolute inset-0 flex flex-col gap-[2px]"
               style={{
-                opacity: getImageOpacity(false),
-                willChange: "opacity",
-                pointerEvents: "none",
+                ...getTextStyle(false),
                 zIndex: 1,
-                backfaceVisibility: "hidden",
-                WebkitBackfaceVisibility: "hidden",
-                transform: "translateZ(0)",
-                transition: "opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                pointerEvents: "none",
               }}
             >
               <span
@@ -602,13 +672,8 @@ export default function Lightbox({
           <div
             className="relative flex flex-col gap-[2px]"
             style={{
-              opacity: getImageOpacity(true),
-              willChange: isTransitioning ? "opacity" : "auto",
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
-              transform: "translateZ(0)",
+              ...getTextStyle(true),
               zIndex: 2,
-              transition: isTransitioning ? "opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)" : "none",
             }}
           >
             <span

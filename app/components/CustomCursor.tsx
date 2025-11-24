@@ -100,7 +100,7 @@ export default function CustomCursor({ scrolled, lightboxOpen = false, cursorSid
 
   // Update cursor type smoothly
   useEffect(() => {
-    if (lightboxOpen && isOverLightboxImage) {
+    if (lightboxOpen) {
       setCursorType("arrow");
     } else {
       setCursorType("dot");
@@ -194,14 +194,14 @@ export default function CustomCursor({ scrolled, lightboxOpen = false, cursorSid
             fontSize: "11px",
             lineHeight: "1",
             fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-            color: "white",
-            backgroundColor: "#000000",
+            color: lightboxOpen && !isOverLightboxImage ? "black" : "white",
+            backgroundColor: lightboxOpen && !isOverLightboxImage ? "white" : "#000000",
             padding: "2px 2px 3px 2px",
             letterSpacing: "0.03em",
             fontWeight: "500",
           }}
         >
-          {cursorSide === "left" ? "[PREV]" : "[NEXT]"}
+          {lightboxOpen && !isOverLightboxImage ? "[ESC]" : cursorSide === "left" ? "[PREV]" : "[NEXT]"}
         </span>
       </div>
       

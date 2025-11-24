@@ -436,7 +436,7 @@ export default function Lightbox({
   const getImageStyle = (isCurrent: boolean) => {
     const baseStyle = {
       backfaceVisibility: "hidden" as const,
-      WebkitBackfaceVisibility: "hidden",
+      WebkitBackfaceVisibility: "hidden" as const,
       transform: "translateZ(0)",
       transition: isTransitioning 
         ? `opacity ${TRANSITION_DURATION} ease-in-out, transform ${TRANSITION_DURATION} ${BOUNCE_EASE}, filter ${TRANSITION_DURATION} ease-out` 
@@ -482,7 +482,7 @@ export default function Lightbox({
   const getTextStyle = (isCurrent: boolean) => {
     const baseStyle = {
       backfaceVisibility: "hidden" as const,
-      WebkitBackfaceVisibility: "hidden",
+      WebkitBackfaceVisibility: "hidden" as const,
       transform: "translateZ(0)",
       transition: isTransitioning 
         ? `opacity ${TRANSITION_DURATION} ease-in-out, transform ${TRANSITION_DURATION} ${BOUNCE_EASE}`

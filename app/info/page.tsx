@@ -83,11 +83,7 @@ export default function Info() {
         <header className="fixed top-0 left-0 right-0 z-50 py-[4px] px-[12px] backdrop-blur-md">
           <div
             className={`w-full flex items-start gap-[8px] text-[13px] font-medium leading-none tracking-[0.03em] transition-colors duration-300 ${
-              isOverImage
-                ? "text-white"
-                : scrolled
-                ? "text-white"
-                : "text-[#0043e0]"
+              scrolled ? "text-white" : "text-[#0043e0]"
             }`}
           >
             <div className="flex-1">

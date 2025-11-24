@@ -111,7 +111,6 @@ const photoOrder = [
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
-  const [isOverImage, setIsOverImage] = useState(false);
   const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set());
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -205,32 +204,8 @@ export default function Home() {
       const scrollTop = window.scrollY;
       const scrolledPercentage = (scrollTop + windowHeight) / documentHeight;
 
-      // Change background when 65% through the page
+      // Change background when 50% through the page
       setScrolled(scrolledPercentage > 0.5);
-
-      // Check if navigation overlaps with any image
-      const header = document.querySelector("header");
-      const images = document.querySelectorAll("main img");
-
-      if (!header) return;
-
-      const headerRect = header.getBoundingClientRect();
-      let overImage = false;
-
-      images.forEach((img) => {
-        const imgRect = img.getBoundingClientRect();
-        // Check if header overlaps with any image
-        if (
-          headerRect.bottom > imgRect.top &&
-          headerRect.top < imgRect.bottom &&
-          headerRect.right > imgRect.left &&
-          headerRect.left < imgRect.right
-        ) {
-          overImage = true;
-        }
-      });
-
-      setIsOverImage(overImage);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -270,11 +245,7 @@ export default function Home() {
         <header className="fixed top-0 left-0 right-0 z-50 py-[4px] px-[12px] backdrop-blur-md">
           <div
             className={`w-full flex items-start gap-[8px] text-[13px] font-medium leading-none tracking-[0.03em] transition-colors duration-300 ${
-              isOverImage
-                ? "text-white"
-                : scrolled
-                ? "text-white"
-                : "text-[#0043e0]"
+              scrolled ? "text-white" : "text-[#0043e0]"
             }`}
           >
             <div className="flex-1">

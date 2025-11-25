@@ -561,10 +561,13 @@ export default function Lightbox({
                 alt={images[previousIndex].title}
                 width={1200}
                 height={1200}
-                className="w-auto h-auto max-w-full max-h-[80vh] object-contain"
+                className="w-auto h-auto max-w-full max-h-[80vh] object-contain select-none"
+                draggable={false}
                 style={{
                   pointerEvents: "none",
                   transform: "translateZ(0)",
+                  userSelect: "none",
+                  WebkitUserSelect: "none",
                 }}
               />
             </div>
@@ -623,13 +626,16 @@ export default function Lightbox({
               alt={currentProject.title}
               width={1200}
               height={1200}
-              className="w-auto h-auto max-w-full max-h-[80vh] object-contain"
+              className="w-auto h-auto max-w-full max-h-[80vh] object-contain select-none"
+              draggable={false}
               priority
               onLoad={handleImageLoad}
               onLoadingComplete={handleImageLoad}
               style={{
                 pointerEvents: "none",
                 transform: "translateZ(0)",
+                userSelect: "none",
+                WebkitUserSelect: "none",
               }}
             />
           </div>

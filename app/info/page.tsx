@@ -10,7 +10,7 @@ export default function Info() {
   const [isOverImage, setIsOverImage] = useState(false);
   const [lettersVisible, setLettersVisible] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
-  const fullText = "MALIK LAING⋅";
+  const fullText = "MALIK LAING";
   const letters = fullText.split("");
 
   // Initialize scroll state based on preserved scroll position
@@ -140,7 +140,6 @@ export default function Info() {
                       className="w-full h-auto shadow-none transition-all duration-300"
                       style={{
                         display: "block",
-                        border: "0.5px solid white",
                       }}
                     />
                   </div>

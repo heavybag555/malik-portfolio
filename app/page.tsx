@@ -122,11 +122,17 @@ export default function Home() {
     width: number;
     height: number;
   } | null>(null);
+  const [cursorStartPos, setCursorStartPos] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const [lettersVisible, setLettersVisible] = useState(false);
   const [columns, setColumns] = useState(4);
-  const [lightboxCursorSide, setLightboxCursorSide] = useState<"left" | "right">("right");
+  const [lightboxCursorSide, setLightboxCursorSide] = useState<
+    "left" | "right"
+  >("right");
   const [isOverLightboxImage, setIsOverLightboxImage] = useState(false);
-  const fullText = "Malik Laing ⋅";
+  const fullText = "Malik Laing";
   const letters = fullText.split("");
 
   // Smooth scroll to gallery
@@ -216,7 +222,6 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-
   // Create a lookup map for metadata by filename
   const metadataMap = new Map(
     photoMetadata.map((meta) => [meta.filename, meta])
@@ -235,7 +240,13 @@ export default function Home() {
   return (
     <>
       {isDesktop && lightboxOpen && (
-        <CustomCursor scrolled={scrolled} lightboxOpen={lightboxOpen} cursorSide={lightboxCursorSide} isOverLightboxImage={isOverLightboxImage} />
+        <CustomCursor
+          scrolled={scrolled}
+          lightboxOpen={lightboxOpen}
+          cursorSide={lightboxCursorSide}
+          isOverLightboxImage={isOverLightboxImage}
+          initialPosition={cursorStartPos}
+        />
       )}
       <main
         className={`w-full min-h-screen p-[12px] pb-[48px] flex flex-col gap-[48px] transition-all duration-[1500ms] ${
@@ -296,7 +307,7 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="w-full flex flex-col gap-[0px] pt-[120px]">
+        <section className="w-full flex flex-col gap-0 pt-[120px]">
           <div className="flex flex-col justify-start relative z-10">
             <div className="flex gap-[10px] items-start">
               {/* Malik Laing container - fills available width */}
@@ -355,6 +366,9 @@ export default function Home() {
                     data-image-index={i}
                     className="flex flex-col gap-[4px] group cursor-pointer"
                     onClick={(e) => {
+                      // Capture the click position for cursor
+                      setCursorStartPos({ x: e.clientX, y: e.clientY });
+
                       // Capture the image element's position before opening lightbox
                       const imageElement = e.currentTarget.querySelector("img");
                       if (imageElement) {
@@ -379,7 +393,8 @@ export default function Home() {
                         className="w-full h-auto"
                         style={{
                           opacity: isVisible ? 1 : 0,
-                          transition: "opacity 1.6s cubic-bezier(0.4, 0, 0.2, 1)",
+                          transition:
+                            "opacity 1.6s cubic-bezier(0.4, 0, 0.2, 1)",
                           transitionDelay: isVisible
                             ? `${transitionDelay}ms`
                             : "0ms",
@@ -397,13 +412,33 @@ export default function Home() {
                           : "0ms",
                       }}
                     >
-                      <span
-                        className={`transition-colors duration-[1500ms] ${
-                          scrolled ? "text-white" : "text-black"
-                        }`}
-                      >
-                        {project.title}
-                      </span>
+                      <div className="flex items-center gap-[6px]">
+                        <span
+                          className={`transition-colors duration-[1500ms] ${
+                            scrolled ? "text-white" : "text-black"
+                          }`}
+                        >
+                          {project.title}
+                        </span>
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center">
+                          <svg
+                            width="5"
+                            height="5"
+                            viewBox="0 0 5 5"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <circle
+                              cx="2.5"
+                              cy="2.5"
+                              r="2.25"
+                              className={`transition-colors duration-[1500ms] ${
+                                scrolled ? "fill-white" : "fill-black"
+                              }`}
+                            />
+                          </svg>
+                        </div>
+                      </div>
                       <span
                         className={`transition-colors duration-[1500ms] ${
                           scrolled ? "text-[#D0D0D0]" : "text-[#ACACAC]"

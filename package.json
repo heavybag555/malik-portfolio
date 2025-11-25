@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "TURBOPACK=0 next dev --hostname localhost -p 3006",
+    "dev": "TURBOPACK=0 next dev --hostname 127.0.0.1 -p 3006",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { labMono } from "./fonts";
 import OverlayWrapper from "./OverlayWrapper";
+import SmoothScroll from "./components/SmoothScroll";
 
 export const metadata: Metadata = {
   title: "malik laing",
@@ -24,6 +25,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${labMono.variable} antialiased`}>
+        <SmoothScroll />
         <OverlayWrapper>{children}</OverlayWrapper>
       </body>
     </html>

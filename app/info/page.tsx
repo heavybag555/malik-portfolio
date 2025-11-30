@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
+import Lenis from "lenis";
 import { useIsDesktop } from "../hooks/useIsDesktop";
 
 export default function Info() {
@@ -40,6 +41,34 @@ export default function Info() {
   // Trigger letter fade-in animation
   useEffect(() => {
     setLettersVisible(true);
+  }, []);
+
+  // Initialize Lenis for smooth scrolling
+  useEffect(() => {
+    if (!mainRef.current) return;
+
+    const lenis = new Lenis({
+      wrapper: mainRef.current,
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: "vertical",
+      gestureDirection: "vertical",
+      smooth: true,
+      mouseMultiplier: 1,
+      smoothTouch: false,
+      touchMultiplier: 2,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
   }, []);
 
   useEffect(() => {

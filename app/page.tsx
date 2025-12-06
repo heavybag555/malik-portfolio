@@ -6,6 +6,33 @@ import Lightbox from "./components/Lightbox";
 import CustomCursor from "./components/CustomCursor";
 import photoMetadata from "./photoMetadata.json";
 import { useIsDesktop } from "./hooks/useIsDesktop";
+import { libreBaskerville } from "./fonts";
+
+// Fade-in text component
+function FadeInText({ text, className }: { text: string; className?: string }) {
+  const [isVisible, setIsVisible] = useState(false);
+  
+  useEffect(() => {
+    // Start fade after a small delay
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <span
+      className={className}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transition: 'opacity 1.2s ease-out',
+      }}
+    >
+      {text}
+    </span>
+  );
+}
 
 // Server-side data fetching moved to a separate function
 const photoOrder = [
@@ -256,7 +283,7 @@ export default function Home() {
           >
             <div className="flex-1">
               <a href="/" className="hover:opacity-60">
-                Malik Laing
+                Malik Laing<span className={`${libreBaskerville.className}`} style={{ fontSize: '15px', letterSpacing: '-0.02em' }}>, 2000</span>
               </a>
             </div>
             <div className="flex-1 flex justify-end items-start gap-[12px]">
@@ -292,13 +319,13 @@ export default function Home() {
 
         <section className="w-full flex flex-col gap-0">
           <div className="h-[250px]"></div>
-          <div className="sticky top-[12px] z-40">
+          <div className="md:sticky md:top-[12px] z-40">
             <div
               className={`text-center text-[12px] leading-none tracking-[0.03em] transition-colors duration-[1500ms] ${
                 scrolled ? "text-white" : "text-[#0043e0]"
               }`}
             >
-              Photographer and director from San Bernardino, California.
+              <FadeInText text="Photographer and director from San Bernardino, California." />
             </div>
           </div>
           <div className="h-[250px]"></div>
@@ -354,7 +381,7 @@ export default function Home() {
                       />
                     </div>
                     <div
-                      className="flex flex-col gap-[4px] text-[11px] leading-none tracking-[0.03em]"
+                      className="flex flex-col gap-[4px] text-[10px] leading-none tracking-[0.04em]"
                       style={{
                         opacity: isVisible ? 1 : 0,
                         transition: "opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1)",

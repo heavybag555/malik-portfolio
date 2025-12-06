@@ -37,10 +37,11 @@ export default function Info() {
   return (
     <main
       ref={mainRef}
-      className="fixed inset-0 w-full h-full overflow-y-auto p-3 pb-12 flex flex-col z-[100]"
+      className="fixed inset-0 w-full overflow-y-auto overscroll-contain p-3 pb-12 flex flex-col z-[100]"
       style={{
         backgroundColor: scrolled ? "rgba(0, 67, 224, 0.95)" : "rgba(255, 255, 255, 0.95)",
         transition: "background-color 1.5s ease",
+        WebkitOverflowScrolling: "touch",
       }}
     >
       {/* Header */}

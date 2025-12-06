@@ -214,9 +214,9 @@ export default function Lightbox({
             }}
           />
         </div>
-        <div className="flex flex-col gap-2 text-[10px] font-medium leading-none tracking-[0.03em] text-center">
+        <div className="flex flex-col gap-[4px] text-[10px] leading-none tracking-[0.04em] text-center">
           <span className="text-black">{currentProject.title}</span>
-          <span className="text-[#666666]">{currentProject.description}</span>
+          <span className="text-[#ACACAC]">{currentProject.description}</span>
         </div>
       </div>
     </div>

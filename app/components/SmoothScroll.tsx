@@ -1,10 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 
 export default function SmoothScroll() {
+  const pathname = usePathname();
+
   useEffect(() => {
+    // Disable Lenis on info page to allow native scrolling in fixed container
+    if (pathname === "/info") return;
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -33,7 +39,7 @@ export default function SmoothScroll() {
       }
       delete win.__lenis;
     };
-  }, []);
+  }, [pathname]);
 
   return null;
 }

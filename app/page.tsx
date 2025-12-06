@@ -9,7 +9,7 @@ import { useIsDesktop } from "./hooks/useIsDesktop";
 import { libreBaskerville } from "./fonts";
 
 // Fade-in text component
-function FadeInText({ text, className }: { text: string; className?: string }) {
+function FadeInText({ text, className, children }: { text?: string; className?: string; children?: React.ReactNode }) {
   const [isVisible, setIsVisible] = useState(false);
   
   useEffect(() => {
@@ -29,7 +29,7 @@ function FadeInText({ text, className }: { text: string; className?: string }) {
         transition: 'opacity 1.2s ease-out',
       }}
     >
-      {text}
+      {children || text}
     </span>
   );
 }
@@ -283,7 +283,7 @@ export default function Home() {
           >
             <div className="flex-1">
               <a href="/" className="hover:opacity-60">
-                Malik Laing<span className={`${libreBaskerville.className}`} style={{ fontSize: '15px', letterSpacing: '-0.02em' }}>, 2000</span>
+                Malik Laing<span className={`${libreBaskerville.className}`} style={{ fontSize: '12px', letterSpacing: '-0.02em' }}>, 2000</span>
               </a>
             </div>
             <div className="flex-1 flex justify-end items-start gap-[12px]">
@@ -325,14 +325,14 @@ export default function Home() {
                 scrolled ? "text-white" : "text-[#0043e0]"
               }`}
             >
-              <FadeInText text="Photographer and director from San Bernardino, California." />
+              <FadeInText>Photographer and director from <span className={libreBaskerville.className} style={{ fontSize: '12px', letterSpacing: '-0.02em' }}>San Bernardino, California.</span></FadeInText>
             </div>
           </div>
           <div className="h-[250px]"></div>
 
           {/* Gallery Grid */}
           <div id="overview" className="scroll-mt-[80px]">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-[24px] md:gap-x-[48px] lg:gap-x-[96px] gap-y-[48px] items-end">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-[12px] md:gap-x-[48px] lg:gap-x-[96px] gap-y-[12px] md:gap-y-[48px] items-end">
               {projects.map((project, i) => {
                 const columnIndex = i % columns; // Dynamic based on screen size
                 const isVisible = visibleImages.has(i);

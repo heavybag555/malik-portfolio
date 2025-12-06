@@ -15,15 +15,23 @@ export default function SmoothScroll() {
       touchMultiplier: 2,
     });
 
+    const win = window as typeof window & { __lenis?: Lenis };
+    win.__lenis = lenis;
+
+    let rafId = 0;
     function raf(time: number) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     }
 
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
 
     return () => {
       lenis.destroy();
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      delete win.__lenis;
     };
   }, []);
 

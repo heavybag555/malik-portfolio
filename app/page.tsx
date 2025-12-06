@@ -126,14 +126,11 @@ export default function Home() {
     x: number;
     y: number;
   } | null>(null);
-  const [lettersVisible, setLettersVisible] = useState(false);
   const [columns, setColumns] = useState(4);
   const [lightboxCursorSide, setLightboxCursorSide] = useState<
     "left" | "right"
   >("right");
   const [isOverLightboxImage, setIsOverLightboxImage] = useState(false);
-  const fullText = "Malik Laing";
-  const letters = fullText.split("");
 
   // Smooth scroll to gallery
   const scrollToGallery = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -151,14 +148,6 @@ export default function Home() {
       });
     }
   };
-
-  // Trigger letter fade-in animation
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLettersVisible(true);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Intersection Observer for image fade-in
   useEffect(() => {
@@ -194,8 +183,10 @@ export default function Home() {
         setColumns(2); // Mobile: 2 columns
       } else if (width < 1024) {
         setColumns(3); // Tablet: 3 columns
-      } else {
+      } else if (width < 1280) {
         setColumns(4); // Desktop: 4 columns
+      } else {
+        setColumns(5); // Large desktop: 5 columns
       }
     };
 
@@ -257,104 +248,64 @@ export default function Home() {
         }}
       >
         {/* Fixed Header */}
-        <header className="fixed top-0 left-0 right-0 z-50 py-[4px] px-[12px] backdrop-blur-md">
+        <header className="fixed top-0 left-0 right-0 z-50 py-[12px] px-[12px]">
           <div
-            className={`w-full flex items-start gap-[8px] text-[13px] font-medium leading-none tracking-[0.03em] transition-colors duration-300 ${
+            className={`w-full flex items-start gap-[8px] text-[12px] leading-none tracking-[0.03em] transition-colors duration-300 ${
               scrolled ? "text-white" : "text-[#0043e0]"
             }`}
           >
             <div className="flex-1">
               <a href="/" className="hover:opacity-60">
-                M.L.
+                Malik Laing
               </a>
             </div>
-            <div className="flex-1 flex justify-between items-start">
-              <nav className="flex gap-[12px]">
-                <div>
-                  <a
-                    href="#overview"
-                    onClick={scrollToGallery}
-                    className="hover:opacity-60"
-                  >
-                    Overview
-                  </a>
-                </div>
-                <div>
-                  <a
-                    href="/info"
-                    className="hover:opacity-60"
-                    onClick={(e) => {
-                      // Save current scroll position before navigation
-                      sessionStorage.setItem(
-                        "homeScrollPosition",
-                        window.scrollY.toString()
-                      );
-                    }}
-                  >
-                    Info
-                  </a>
-                </div>
-              </nav>
-              <div>
-                <a
-                  href="mailto:Maliklphoto1@gmail.com"
-                  className="hover:opacity-60"
-                >
-                  Contact
-                </a>
-              </div>
+            <div className="flex-1 flex justify-end items-start gap-[12px]">
+              <a
+                href="#overview"
+                onClick={scrollToGallery}
+                className="hover:opacity-60"
+              >
+                Overview
+              </a>
+              <a
+                href="/info"
+                className="hover:opacity-60"
+                onClick={(e) => {
+                  // Save current scroll position before navigation
+                  sessionStorage.setItem(
+                    "homeScrollPosition",
+                    window.scrollY.toString()
+                  );
+                }}
+              >
+                Info
+              </a>
+              <a
+                href="mailto:Maliklphoto1@gmail.com"
+                className="hover:opacity-60"
+              >
+                Contact
+              </a>
             </div>
           </div>
         </header>
 
-        <section className="w-full flex flex-col gap-0 pt-[120px]">
-          <div className="flex flex-col justify-start relative z-10">
-            <div className="flex gap-[10px] items-start">
-              {/* Malik Laing container - fills available width */}
-              <div className="flex-1">
-                <h1 className="text-[13px] leading-[60%] tracking-[0.01em]">
-                  <span
-                    style={{
-                      fontFamily:
-                        '"Helvetica Neue", Helvetica, Arial, sans-serif',
-                      color: "#0043E0",
-                      fontWeight: "500",
-                    }}
-                  >
-                    {letters.map((letter, index) => (
-                      <span
-                        key={index}
-                        style={{
-                          opacity: lettersVisible ? 1 : 0,
-                          transition: "opacity 1200ms ease-in-out",
-                          transitionDelay: lettersVisible
-                            ? `${index * 80}ms`
-                            : "0ms",
-                        }}
-                      >
-                        {letter === " " ? "\u00A0" : letter}
-                      </span>
-                    ))}
-                  </span>
-                </h1>
-              </div>
-
-              <div
-                className={`flex-1 flex justify-between items-start text-[13px] font-medium leading-none tracking-[0.03em] transition-colors duration-[1500ms] ${
-                  scrolled ? "text-white" : "text-[#0043e0]"
-                }`}
-              >
-                <p className="max-w-[403px]">
-                  Photographer and director from San Bernardino, California.
-                </p>
-                <span>2000</span>
-              </div>
+        <section className="w-full flex flex-col gap-0">
+          <div className="h-[250px]"></div>
+          <div className="sticky top-[12px] z-40">
+            <div
+              className={`text-center text-[12px] leading-none tracking-[0.03em] transition-colors duration-[1500ms] ${
+                scrolled ? "text-white" : "text-[#0043e0]"
+              }`}
+            >
+              Photographer and director from San Bernardino, California.
             </div>
           </div>
+          <div className="h-[250px]"></div>
 
           {/* Gallery Grid */}
           <div id="overview" className="scroll-mt-[80px]">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-[24px] md:gap-x-[48px] lg:gap-x-[96px] gap-y-[48px] items-end">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-[24px] md:gap-x-[48px] lg:gap-x-[96px] gap-y-[48px] items-end">
               {projects.map((project, i) => {
                 const columnIndex = i % columns; // Dynamic based on screen size
                 const isVisible = visibleImages.has(i);
@@ -364,7 +315,7 @@ export default function Home() {
                   <div
                     key={i}
                     data-image-index={i}
-                    className="flex flex-col gap-[4px] group cursor-pointer"
+                    className="flex flex-col gap-[8px] group cursor-pointer"
                     onClick={(e) => {
                       // Capture the click position for cursor
                       setCursorStartPos({ x: e.clientX, y: e.clientY });
@@ -399,11 +350,11 @@ export default function Home() {
                             ? `${transitionDelay}ms`
                             : "0ms",
                         }}
-                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
                       />
                     </div>
                     <div
-                      className="flex flex-col gap-[2px] text-[11px] font-medium leading-none tracking-[0.03em]"
+                      className="flex flex-col gap-[4px] text-[11px] leading-none tracking-[0.03em]"
                       style={{
                         opacity: isVisible ? 1 : 0,
                         transition: "opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1)",

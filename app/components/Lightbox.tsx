@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useIsDesktop } from "../hooks/useIsDesktop";
 
 interface Project {
@@ -11,13 +11,6 @@ interface Project {
   image: string;
 }
 
-interface InitialImagePosition {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
 interface LightboxProps {
   isOpen: boolean;
   currentIndex: number;
@@ -25,7 +18,7 @@ interface LightboxProps {
   onClose: () => void;
   onNavigate: (index: number) => void;
   scrolled: boolean;
-  initialImagePosition?: InitialImagePosition | null;
+  initialImagePosition?: { x: number; y: number; width: number; height: number } | null;
   onCursorSideChange?: (side: "left" | "right") => void;
   onImageHoverChange?: (isOver: boolean) => void;
 }
@@ -36,159 +29,67 @@ export default function Lightbox({
   images,
   onClose,
   onNavigate,
-  scrolled,
   initialImagePosition,
   onCursorSideChange,
   onImageHoverChange,
 }: LightboxProps) {
   const isDesktop = useIsDesktop();
-  const [mouseX, setMouseX] = useState(0);
-  const [cursorSide, setCursorSide] = useState<"left" | "right">("right");
-  const [isOverImage, setIsOverImage] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [contentOpacity, setContentOpacity] = useState(0);
-  const [slideDirection, setSlideDirection] = useState<"left" | "right" | null>(
-    null
-  );
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [morphTransform, setMorphTransform] = useState<string>("translate3d(0, 0, 0) scale(1)");
-  const [isMorphing, setIsMorphing] = useState(false);
-  const [previousIndex, setPreviousIndex] = useState<number | null>(null);
-  const [transitionProgress, setTransitionProgress] = useState(0);
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const prevIndexRef = useRef(currentIndex);
-  const imageLoadedRef = useRef(false);
-  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const preloadedImagesRef = useRef<Set<string>>(new Set());
-  const imageLoadPromisesRef = useRef<Map<string, Promise<void>>>(new Map());
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [displayIndex, setDisplayIndex] = useState(currentIndex);
+  const preloadedRef = useRef<Set<string>>(new Set());
 
-  // Reset image loaded state when index changes
-  useEffect(() => {
-    if (currentIndex !== prevIndexRef.current) {
-      setIsImageLoaded(false);
-      imageLoadedRef.current = false;
-    }
-  }, [currentIndex]);
-
-  const handlePrevious = () => {
-    // Allow navigation even during transitions, but clear any pending transition
-    if (transitionTimeoutRef.current) {
-      clearTimeout(transitionTimeoutRef.current);
-      transitionTimeoutRef.current = null;
-    }
-    setIsTransitioning(false);
-    setSlideDirection(null);
-    setPreviousIndex(null);
-    setTransitionProgress(0);
-    
+  // Navigation handlers
+  const handlePrevious = useCallback(() => {
     const newIndex = currentIndex === 0 ? images.length - 1 : currentIndex - 1;
     onNavigate(newIndex);
-  };
+  }, [currentIndex, images.length, onNavigate]);
 
-  const handleNext = () => {
-    // Allow navigation even during transitions, but clear any pending transition
-    if (transitionTimeoutRef.current) {
-      clearTimeout(transitionTimeoutRef.current);
-      transitionTimeoutRef.current = null;
-    }
-    setIsTransitioning(false);
-    setSlideDirection(null);
-    setPreviousIndex(null);
-    setTransitionProgress(0);
-    
+  const handleNext = useCallback(() => {
     const newIndex = currentIndex === images.length - 1 ? 0 : currentIndex + 1;
     onNavigate(newIndex);
-  };
+  }, [currentIndex, images.length, onNavigate]);
 
-  // Sync prevIndexRef when lightbox opens
-  useEffect(() => {
-    if (isOpen) {
-      prevIndexRef.current = currentIndex;
-      setIsTransitioning(false);
-      setSlideDirection(null);
-      setPreviousIndex(null);
-      setTransitionProgress(0);
-      setIsImageLoaded(false);
-    }
-  }, [isOpen, currentIndex]);
-
-  // Aggressively preload images for smooth transitions
+  // Preload adjacent images
   useEffect(() => {
     if (!isOpen) return;
 
-    const preloadImage = (src: string): Promise<void> => {
-      // Return existing promise if already loading
-      if (imageLoadPromisesRef.current.has(src)) {
-        return imageLoadPromisesRef.current.get(src)!;
-      }
-
-      // Return immediately if already loaded
-      if (preloadedImagesRef.current.has(src)) {
-        return Promise.resolve();
-      }
-
-      const promise = new Promise<void>((resolve) => {
-        const img = new window.Image();
-        img.onload = () => {
-          preloadedImagesRef.current.add(src);
-          resolve();
-        };
-        img.onerror = () => {
-          // Still resolve on error to not block transitions
-          preloadedImagesRef.current.add(src);
-          resolve();
-        };
-        img.src = src;
-      });
-
-      imageLoadPromisesRef.current.set(src, promise);
-      return promise;
+    const preload = (src: string) => {
+      if (preloadedRef.current.has(src)) return;
+      const img = new window.Image();
+      img.src = src;
+      preloadedRef.current.add(src);
     };
 
-    // Preload current, previous, next, and one more in each direction
-    const prevIndex = currentIndex === 0 ? images.length - 1 : currentIndex - 1;
-    const nextIndex = currentIndex === images.length - 1 ? 0 : currentIndex + 1;
-    const prev2Index = prevIndex === 0 ? images.length - 1 : prevIndex - 1;
-    const next2Index = nextIndex === images.length - 1 ? 0 : nextIndex + 1;
+    const prev = currentIndex === 0 ? images.length - 1 : currentIndex - 1;
+    const next = currentIndex === images.length - 1 ? 0 : currentIndex + 1;
 
-    // Preload all adjacent images
-    preloadImage(images[currentIndex]?.image);
-    preloadImage(images[prevIndex]?.image);
-    preloadImage(images[nextIndex]?.image);
-    preloadImage(images[prev2Index]?.image);
-    preloadImage(images[next2Index]?.image);
+    preload(images[currentIndex]?.image);
+    preload(images[prev]?.image);
+    preload(images[next]?.image);
   }, [isOpen, currentIndex, images]);
 
-  // Track mouse position (only on desktop)
+  // Track mouse for cursor side
   useEffect(() => {
-    if (!isOpen || !isDesktop) {
-      return;
-    }
+    if (!isOpen || !isDesktop) return;
 
-    // Initialize cursor side when lightbox opens
-    const initialSide = window.innerWidth / 2 < window.innerWidth / 2 ? "left" : "right";
-    setCursorSide("right"); // Default to right
     onCursorSideChange?.("right");
 
     const handleMouseMove = (e: MouseEvent) => {
-      setMouseX(e.clientX);
-      const viewportWidth = window.innerWidth;
-      const newSide = e.clientX < viewportWidth / 2 ? "left" : "right";
-      setCursorSide(newSide);
-      onCursorSideChange?.(newSide);
+      const side = e.clientX < window.innerWidth / 2 ? "left" : "right";
+      onCursorSideChange?.(side);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [isOpen, isDesktop, onCursorSideChange]);
 
-  // Handle keyboard events
+  // Keyboard navigation
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" || e.key === "Esc") {
+      if (e.key === "Escape") {
         e.preventDefault();
         onClose();
       } else if (e.key === "ArrowLeft") {
@@ -202,501 +103,120 @@ export default function Lightbox({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, currentIndex, images.length, onClose]);
+  }, [isOpen, onClose, handlePrevious, handleNext]);
 
-  // Handle enter/exit morph animations and fade transitions
+  // Handle visibility
   useEffect(() => {
-    if (isOpen && initialImagePosition) {
+    if (isOpen) {
       setIsVisible(true);
-      setIsMorphing(true);
-      setContentOpacity(0);
-      
-      // Calculate center position
-      const viewportCenterX = window.innerWidth / 2;
-      const viewportCenterY = window.innerHeight / 2;
-      
-      // Calculate transform needed to move from initial position to center
-      const deltaX = viewportCenterX - initialImagePosition.x;
-      const deltaY = viewportCenterY - initialImagePosition.y;
-      
-      // Estimate final image size (will be adjusted based on max-width/max-height constraints)
-      // For now, use a reasonable scale factor
-      const estimatedFinalWidth = Math.min(1200, window.innerWidth * 0.9);
-      const scale = estimatedFinalWidth / initialImagePosition.width;
-      
-      // Start from initial position
-      setMorphTransform(`translate3d(${deltaX}px, ${deltaY}px) scale(${scale})`);
-      
-      // Use requestAnimationFrame to ensure smooth transition
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          // Animate to center
-          setMorphTransform("translate3d(0, 0, 0) scale(1)");
-          
-          // Fade in content after morph starts
-          setTimeout(() => {
-            setContentOpacity(1);
-          }, 50);
-          
-          // Complete morphing after animation duration
-          setTimeout(() => {
-            setIsMorphing(false);
-          }, 300);
-        });
-      });
-    } else if (!isOpen && initialImagePosition) {
-      // Exit animation: morph back to original position
-      // Ensure we start from center position
-      setMorphTransform("translate3d(0, 0, 0) scale(1)");
-      setIsMorphing(true);
-      setContentOpacity(0);
-      
-      // Use requestAnimationFrame to ensure smooth transition from current state
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const viewportCenterX = window.innerWidth / 2;
-          const viewportCenterY = window.innerHeight / 2;
-          const deltaX = viewportCenterX - initialImagePosition.x;
-          const deltaY = viewportCenterY - initialImagePosition.y;
-          const estimatedFinalWidth = Math.min(1200, window.innerWidth * 0.9);
-          const scale = estimatedFinalWidth / initialImagePosition.width;
-          
-          // Animate back to initial position
-          setMorphTransform(`translate3d(${deltaX}px, ${deltaY}px) scale(${scale})`);
-        });
-      });
-      
-      const timer = setTimeout(() => {
-        setIsVisible(false);
-        setIsMorphing(false);
-        setMorphTransform("translate3d(0, 0, 0) scale(1)");
-      }, 300);
-      
+      setDisplayIndex(currentIndex);
+      requestAnimationFrame(() => setIsAnimating(true));
+    } else {
+      setIsAnimating(false);
+      const timer = setTimeout(() => setIsVisible(false), 300);
       return () => clearTimeout(timer);
-    } else {
-      // Fallback for when no initial position (shouldn't happen, but handle gracefully)
-      if (isOpen) {
-        setIsVisible(true);
-        setContentOpacity(0);
-        const timer = setTimeout(() => {
-          setContentOpacity(1);
-        }, 10);
-        return () => clearTimeout(timer);
-      } else {
-        setContentOpacity(0);
-        const timer = setTimeout(() => {
-          setIsVisible(false);
-        }, 150);
-        return () => clearTimeout(timer);
-      }
     }
-  }, [isOpen, initialImagePosition]);
+  }, [isOpen, currentIndex]);
 
-  // Handle smooth image transitions with cross-fade
+  // Sync display index with current index (for navigation while open)
   useEffect(() => {
-    if (!isOpen) return;
+    if (isOpen) setDisplayIndex(currentIndex);
+  }, [currentIndex, isOpen]);
 
-    // Only trigger transition if index actually changed
-    if (currentIndex === prevIndexRef.current) return;
-
-    // Detect direction based on index change
-    const direction =
-      currentIndex > prevIndexRef.current
-        ? "left"
-        : currentIndex < prevIndexRef.current
-        ? "right"
-        : null;
-
-    if (!direction) return;
-
-    const newImageSrc = images[currentIndex]?.image;
-    const previousIndex = prevIndexRef.current;
-    
-    // Update ref immediately to prevent duplicate transitions
-    prevIndexRef.current = currentIndex;
-    
-    // Check if image is already preloaded
-    const isPreloaded = preloadedImagesRef.current.has(newImageSrc);
-    
-    // Start transition immediately if preloaded, otherwise wait briefly
-    const startTransition = () => {
-      // Clear any existing timeout
-      if (transitionTimeoutRef.current) {
-        clearTimeout(transitionTimeoutRef.current);
-      }
-
-      setSlideDirection(direction);
-      setPreviousIndex(previousIndex);
-      setIsTransitioning(true);
-      setTransitionProgress(0); // Start with previous visible, new hidden
-      
-      // Use CSS transition timing (500ms) for smooth bouncy fade
-      const duration = 500;
-
-      // Use double RAF to ensure initial state is painted before transition
-      // This ensures CSS transition can properly animate the opacity change
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          // Trigger opacity change - CSS transition will handle smooth fade
-          setTransitionProgress(1); // Fade to new image
-        });
-      });
-
-      // Complete transition after duration (matching CSS transition time)
-      transitionTimeoutRef.current = setTimeout(() => {
-        setIsTransitioning(false);
-        setSlideDirection(null);
-        setPreviousIndex(null);
-        setTransitionProgress(0);
-      }, duration);
-    };
-
-    if (isPreloaded) {
-      // Start immediately if preloaded
-      requestAnimationFrame(() => {
-        requestAnimationFrame(startTransition);
-      });
-    } else {
-      // Wait briefly for image to start loading, but don't block too long
-      const checkImageLoad = () => {
-        if (imageLoadedRef.current || preloadedImagesRef.current.has(newImageSrc)) {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(startTransition);
-          });
-        } else {
-          // Don't wait more than 50ms - start transition anyway
-          setTimeout(() => {
-            requestAnimationFrame(() => {
-              requestAnimationFrame(startTransition);
-            });
-          }, 50);
-        }
-      };
-
-      requestAnimationFrame(checkImageLoad);
-    }
-
-    return () => {
-      if (transitionTimeoutRef.current) {
-        clearTimeout(transitionTimeoutRef.current);
-      }
-    };
-  }, [currentIndex, isOpen, images]);
-
-  // Prevent body scroll when lightbox is open
+  // Body scroll lock
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const viewportWidth = window.innerWidth;
-    const clickX = e.clientX;
-
-    // Navigate based on which side of the screen is clicked
-    if (clickX < viewportWidth / 2) {
+  // Handle click navigation on image
+  const handleImageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    if (e.clientX < centerX) {
       handlePrevious();
     } else {
       handleNext();
     }
-  };
+  }, [handlePrevious, handleNext]);
 
-  const handleImageLoad = () => {
-    // Mark image as loaded
-    imageLoadedRef.current = true;
-    setIsImageLoaded(true);
-  };
-
-  // Reset image loaded state when image changes
-  useEffect(() => {
-    imageLoadedRef.current = false;
-    // We don't reset isImageLoaded here because it's handled in the other effect
-    // and we want to preserve it during the render phase before transition
-  }, [currentIndex]);
+  // Handle mouse move over image for cursor
+  const handleImageMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDesktop) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    onCursorSideChange?.(e.clientX < centerX ? "left" : "right");
+  }, [isDesktop, onCursorSideChange]);
 
   if (!isVisible) return null;
 
-  // Use the previous index if we are in a "pending" state (prop changed but effect hasn't run)
-  // This prevents the text/image from changing before the transition starts
-  const effectiveIndex = (isOpen && currentIndex !== prevIndexRef.current) ? prevIndexRef.current : currentIndex;
-  const currentProject = images[effectiveIndex];
-  const previousProject = previousIndex !== null ? images[previousIndex] : null;
+  const currentProject = images[displayIndex];
 
-  // Bouncy bezier curve
-  const BOUNCE_EASE = "cubic-bezier(0.34, 1.56, 0.64, 1)";
-  const TRANSITION_DURATION = "0.5s";
-
-  // Calculate styles for cross-fade transition with bounce
-  const getImageStyle = (isCurrent: boolean) => {
-    const baseStyle = {
-      backfaceVisibility: "hidden" as const,
-      WebkitBackfaceVisibility: "hidden" as const,
-      transform: "translateZ(0)",
-      transition: isTransitioning 
-        ? `opacity ${TRANSITION_DURATION} ease-in-out, transform ${TRANSITION_DURATION} ${BOUNCE_EASE}, filter ${TRANSITION_DURATION} ease-out` 
-        : `filter 0.5s ease-out`,
+  // Calculate morph transform
+  let morphStyle: React.CSSProperties = {};
+  if (initialImagePosition && !isAnimating) {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const dx = vw / 2 - initialImagePosition.x;
+    const dy = vh / 2 - initialImagePosition.y;
+    const finalWidth = Math.min(1200, vw * 0.9);
+    const scale = finalWidth / initialImagePosition.width;
+    morphStyle = {
+      transform: `translate3d(${dx}px, ${dy}px, 0) scale(${scale})`,
     };
-
-    if (!isTransitioning) {
-      // Static state
-      return {
-        ...baseStyle,
-        opacity: isCurrent ? 1 : 0,
-        transform: "translateZ(0) scale(1)",
-        filter: isCurrent && !isImageLoaded ? "blur(20px)" : "blur(0px)",
-      };
-    }
-    
-    // During transition
-    if (isCurrent) {
-      // Incoming image
-      // Starts at opacity 0, scale 0.9, blur 20px
-      // Ends at opacity 1, scale 1, blur 0px
-      const isTargetState = transitionProgress > 0;
-      return {
-        ...baseStyle,
-        opacity: isTargetState ? 1 : 0,
-        transform: isTargetState ? "translateZ(0) scale(1)" : "translateZ(0) scale(0.95)",
-        filter: isTargetState && isImageLoaded ? "blur(0px)" : "blur(20px)",
-      };
-    } else {
-      // Outgoing image
-      // Starts at opacity 1, scale 1
-      // Ends at opacity 0, scale 1.05
-      const isTargetState = transitionProgress > 0;
-      return {
-        ...baseStyle,
-        opacity: isTargetState ? 0 : 1,
-        transform: isTargetState ? "translateZ(0) scale(1.05)" : "translateZ(0) scale(1)",
-        filter: "blur(0px)", // Don't blur outgoing
-      };
-    }
-  };
-  
-  const getTextStyle = (isCurrent: boolean) => {
-    const baseStyle = {
-      backfaceVisibility: "hidden" as const,
-      WebkitBackfaceVisibility: "hidden" as const,
-      transform: "translateZ(0)",
-      transition: isTransitioning 
-        ? `opacity ${TRANSITION_DURATION} ease-in-out, transform ${TRANSITION_DURATION} ${BOUNCE_EASE}`
-        : "none",
-    };
-
-    if (!isTransitioning) {
-      return {
-        ...baseStyle,
-        opacity: isCurrent ? 1 : 0,
-        transform: "translateZ(0) translateY(0)",
-      };
-    }
-
-    if (isCurrent) {
-      // Incoming text: Slide up + Fade in
-      const isTargetState = transitionProgress > 0;
-      return {
-        ...baseStyle,
-        opacity: isTargetState ? 1 : 0,
-        transform: isTargetState ? "translateZ(0) translateY(0)" : "translateZ(0) translateY(10px)",
-      };
-    } else {
-      // Outgoing text: Slide up + Fade out
-      const isTargetState = transitionProgress > 0;
-      return {
-        ...baseStyle,
-        opacity: isTargetState ? 0 : 1,
-        transform: isTargetState ? "translateZ(0) translateY(-10px)" : "translateZ(0) translateY(0)",
-      };
-    }
-  };
+  }
 
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center cursor-none"
       style={{
         backgroundColor: "rgba(255, 255, 255, 0.97)",
-        opacity: isOpen ? contentOpacity : 0,
-        transition: "opacity 0.15s ease-out",
+        opacity: isAnimating ? 1 : 0,
+        transition: "opacity 0.3s ease-out",
       }}
       onClick={onClose}
     >
       <div
-        ref={contentRef}
-        className="lightbox-content flex flex-col items-center gap-[12px] max-w-[90vw] max-h-[90vh] relative"
+        className="flex flex-col items-center gap-3 max-w-[90vw] max-h-[90vh]"
         style={{
-          willChange: isTransitioning || isMorphing ? "transform, opacity" : "auto",
-          transform: morphTransform,
-          transition: isMorphing
+          ...morphStyle,
+          transition: isAnimating
             ? "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
             : "none",
+          transform: isAnimating ? "translate3d(0, 0, 0) scale(1)" : morphStyle.transform,
         }}
         onClick={(e) => e.stopPropagation()}
       >
         <div
-          className="relative w-full h-auto flex items-center justify-center overflow-hidden"
-          style={{
-            contain: "layout style paint",
-            transform: "translateZ(0)",
-            willChange: isTransitioning ? "contents" : "auto",
-          }}
+          className="relative p-3 cursor-none"
+          onClick={handleImageClick}
+          onMouseEnter={() => isDesktop && onImageHoverChange?.(true)}
+          onMouseLeave={() => isDesktop && onImageHoverChange?.(false)}
+          onMouseMove={handleImageMouseMove}
         >
-          {/* Previous image (during transition) */}
-          {previousIndex !== null && isTransitioning && (
-            <div
-              className="absolute inset-0 flex items-center justify-center p-[12px]"
-              style={{
-                ...getImageStyle(false),
-                zIndex: 1,
-                pointerEvents: "none",
-              }}
-            >
-              <Image
-                src={images[previousIndex].image}
-                alt={images[previousIndex].title}
-                width={1200}
-                height={1200}
-                className="w-auto h-auto max-w-full max-h-[80vh] object-contain select-none"
-                draggable={false}
-                style={{
-                  pointerEvents: "none",
-                  transform: "translateZ(0)",
-                  userSelect: "none",
-                  WebkitUserSelect: "none",
-                }}
-              />
-            </div>
-          )}
-          
-          {/* Current image */}
-          <div
-            className="relative p-[12px]"
+          <Image
+            key={currentProject.image}
+            src={currentProject.image}
+            alt={currentProject.title}
+            width={1200}
+            height={1200}
+            className="w-auto h-auto max-w-full max-h-[80vh] object-contain select-none"
+            draggable={false}
+            priority
             style={{
-              ...getImageStyle(true),
-              willChange: isTransitioning ? "opacity, transform, filter" : "auto",
-              zIndex: 2,
+              pointerEvents: "none",
+              userSelect: "none",
             }}
-            onClick={(e) => {
-              e.stopPropagation();
-
-              // Get the image container's bounding rect
-              const imageContainer = e.currentTarget;
-              const rect = imageContainer.getBoundingClientRect();
-              const clickX = e.clientX;
-              const imageCenterX = rect.left + rect.width / 2;
-
-              // Navigate based on which side of the image is clicked
-              if (clickX < imageCenterX) {
-                handlePrevious();
-              } else {
-                handleNext();
-              }
-            }}
-            onMouseEnter={() => {
-              if (isDesktop) {
-                setIsOverImage(true);
-                onImageHoverChange?.(true);
-              }
-            }}
-            onMouseLeave={() => {
-              if (isDesktop) {
-                setIsOverImage(false);
-                onImageHoverChange?.(false);
-              }
-            }}
-            onMouseMove={(e) => {
-              // Update cursor based on which side of the image the mouse is over (only on desktop)
-              if (isDesktop) {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const mouseX = e.clientX;
-                const imageCenterX = rect.left + rect.width / 2;
-                const newSide = mouseX < imageCenterX ? "left" : "right";
-                setCursorSide(newSide);
-                onCursorSideChange?.(newSide);
-              }
-            }}
-          >
-            <Image
-              src={currentProject.image}
-              alt={currentProject.title}
-              width={1200}
-              height={1200}
-              className="w-auto h-auto max-w-full max-h-[80vh] object-contain select-none"
-              draggable={false}
-              priority
-              onLoad={handleImageLoad}
-              onLoadingComplete={handleImageLoad}
-              style={{
-                pointerEvents: "none",
-                transform: "translateZ(0)",
-                userSelect: "none",
-                WebkitUserSelect: "none",
-              }}
-            />
-          </div>
+          />
         </div>
-        <div
-          className="relative flex flex-col gap-[2px] text-[11px] font-medium leading-none tracking-[0.03em] text-center min-h-[32px]"
-          style={{
-            contain: "layout style paint",
-            transform: "translateZ(0)",
-          }}
-        >
-          {/* Previous text (during transition) */}
-          {previousProject && previousIndex !== null && isTransitioning && (
-            <div
-              className="absolute inset-0 flex flex-col gap-[2px]"
-              style={{
-                ...getTextStyle(false),
-                zIndex: 1,
-                pointerEvents: "none",
-              }}
-            >
-              <span
-                className={`transition-colors duration-1500 ${
-                  scrolled ? "text-black" : "text-black"
-                }`}
-              >
-                {previousProject.title}
-              </span>
-              <span
-                className={`transition-colors duration-1500 ${
-                  scrolled ? "text-[#666666]" : "text-[#666666]"
-                }`}
-              >
-                {previousProject.description}
-              </span>
-            </div>
-          )}
-          
-          {/* Current text */}
-          <div
-            className="relative flex flex-col gap-[2px]"
-            style={{
-              ...getTextStyle(true),
-              zIndex: 2,
-            }}
-          >
-            <span
-              className={`transition-colors duration-1500 ${
-                scrolled ? "text-black" : "text-black"
-              }`}
-            >
-              {currentProject.title}
-            </span>
-            <span
-              className={`transition-colors duration-1500 ${
-                scrolled ? "text-[#666666]" : "text-[#666666]"
-              }`}
-            >
-              {currentProject.description}
-            </span>
-          </div>
+        <div className="flex flex-col gap-2 text-[10px] font-medium leading-none tracking-[0.03em] text-center">
+          <span className="text-black">{currentProject.title}</span>
+          <span className="text-[#666666]">{currentProject.description}</span>
         </div>
       </div>
     </div>

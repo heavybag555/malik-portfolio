@@ -16,14 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link
-          rel="preload"
-          href="/malik-info.jpg"
-          as="image"
-          type="image/jpeg"
-        />
-      </head>
+      <head></head>
       <body className={`${labMono.variable} antialiased`}>
         <SmoothScroll />
         <OverlayWrapper>{children}</OverlayWrapper>

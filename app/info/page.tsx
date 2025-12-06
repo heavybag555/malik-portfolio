@@ -2,224 +2,111 @@
 
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import Lenis from "lenis";
-import { useIsDesktop } from "../hooks/useIsDesktop";
 
 export default function Info() {
-  const isDesktop = useIsDesktop();
   const [scrolled, setScrolled] = useState(false);
-  const [isOverImage, setIsOverImage] = useState(false);
-  const [lettersVisible, setLettersVisible] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
-  const fullText = "MALIK LAING";
-  const letters = fullText.split("");
 
-  // Initialize scroll state based on preserved scroll position
+  // Check initial scroll state from session storage
   useEffect(() => {
-    const savedScrollPosition = sessionStorage.getItem("homeScrollPosition");
-    if (savedScrollPosition) {
-      const scrollY = parseInt(savedScrollPosition, 10);
-      const windowHeight = window.innerHeight;
-      // Estimate document height (will be updated when page loads)
-      const estimatedHeight = Math.max(
-        document.documentElement.scrollHeight,
-        windowHeight * 2
-      );
-      const scrolledPercentage = (scrollY + windowHeight) / estimatedHeight;
-      // Set initial state based on preserved scroll position
-      setScrolled(scrolledPercentage > 0.5);
+    const saved = sessionStorage.getItem("homeScrollPosition");
+    if (saved) {
+      const scrollY = parseInt(saved, 10);
+      const progress = (scrollY + window.innerHeight) / Math.max(document.documentElement.scrollHeight, window.innerHeight * 2);
+      setScrolled(progress > 0.5);
     }
+    setLoaded(true);
   }, []);
 
-  // Ensure overlay starts at top
+  // Scroll handler
   useEffect(() => {
-    if (mainRef.current) {
-      mainRef.current.scrollTop = 0;
-    }
-  }, []);
-
-  // Trigger letter fade-in animation
-  useEffect(() => {
-    setLettersVisible(true);
-  }, []);
-
-  // Initialize Lenis for smooth scrolling
-  useEffect(() => {
-    if (!mainRef.current) return;
-
-    const lenis = new Lenis({
-      wrapper: mainRef.current,
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 2,
-    });
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!mainRef.current) return;
+    const container = mainRef.current;
+    if (!container) return;
 
     const handleScroll = () => {
-      if (!mainRef.current) return;
-      // Calculate how close we are to the bottom of the page
-      const container = mainRef.current;
-      const containerHeight = container.clientHeight;
-      const scrollHeight = container.scrollHeight;
-      const scrollTop = container.scrollTop;
-      const scrolledPercentage = (scrollTop + containerHeight) / scrollHeight;
-
-      // Change background when 50% through the page
-      setScrolled(scrolledPercentage > 0.5);
+      const progress = (container.scrollTop + container.clientHeight) / container.scrollHeight;
+      setScrolled(progress > 0.5);
     };
 
-    const container = mainRef.current;
-    container.addEventListener("scroll", handleScroll);
-    handleScroll(); // Check initial state
-
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => container.removeEventListener("scroll", handleScroll);
   }, []);
 
-
   return (
-    <>
-      <main
-        ref={mainRef}
-        className="fixed inset-0 w-full h-full overflow-y-auto p-[12px] pb-[48px] flex flex-col gap-[48px] pointer-events-auto z-[100]"
-        style={{
-          backgroundColor: scrolled
-            ? "rgba(0, 67, 224, 0.95)"
-            : "rgba(255, 255, 255, 0.95)",
-          transition: "background-color 1500ms ease-in-out",
-          willChange: "background-color",
-        }}
-      >
-        {/* Fixed Header */}
-        <header className="fixed top-0 left-0 right-0 z-50 py-[4px] px-[12px] backdrop-blur-md">
+    <main
+      ref={mainRef}
+      className="fixed inset-0 w-full h-full overflow-y-auto p-3 pb-12 flex flex-col z-[100]"
+      style={{
+        backgroundColor: scrolled ? "rgba(0, 67, 224, 0.95)" : "rgba(255, 255, 255, 0.95)",
+        transition: "background-color 1.5s ease",
+      }}
+    >
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 p-3">
+        <div
+          className={`w-full flex items-start gap-2 text-[12px] leading-none tracking-[0.02em] transition-colors duration-300 ${scrolled ? "text-white" : "text-[#0043e0]"}`}
+          style={{ opacity: loaded ? 1 : 0, transition: "opacity 1s ease-in-out, color 300ms" }}
+        >
+          <div className="flex-1">
+            <a href="/" className="hover:opacity-60">Malik Laing</a>
+          </div>
+          <div className="flex-1 flex justify-end gap-3">
+            <a href="/#gallery" className="hover:opacity-60">Overview</a>
+            <a href="/info" className="hover:opacity-60">Info</a>
+            <a href="mailto:Maliklphoto1@gmail.com" className="hover:opacity-60">Contact</a>
+          </div>
+        </div>
+      </header>
+
+      {/* Spacer */}
+      <div style={{ paddingTop: '48px' }} />
+
+      {/* Content */}
+      <section className="w-full flex flex-col gap-[156px]">
+        <div className="flex flex-col md:flex-row gap-3 items-start">
+          {/* Image */}
+          <div className="flex-[0.5] w-full md:w-auto overflow-hidden">
+            <Image
+              src="/malik-info.jpg"
+              alt="Malik Laing"
+              width={200}
+              height={200}
+              priority
+              className="w-full h-auto transition-all duration-500 ease-out grayscale hover:grayscale-0"
+            />
+          </div>
+
+          {/* Bio */}
           <div
-            className={`w-full flex items-start gap-[8px] text-[13px] font-medium leading-none tracking-[0.03em] transition-colors duration-300 ${
-              scrolled ? "text-white" : "text-[#0043e0]"
-            }`}
+            className={`flex-1 w-full md:w-auto flex flex-col gap-3 text-[30px] font-semibold leading-[1.1] tracking-[-0.02em] ${scrolled ? "text-white" : "text-[#0043e0]"}`}
+            style={{
+              opacity: loaded ? 1 : 0,
+              transition: "opacity 1s ease-in-out 0.3s, color 1.5s ease",
+            }}
           >
-            <div className="flex-1">
-              <a href="/" className="hover:opacity-60">
-                M.L.
-              </a>
-            </div>
-            <div className="flex-1 flex justify-between items-start">
-              <nav className="flex gap-[12px]">
-                <div>
-                  <a href="/" className="hover:opacity-60">
-                    Overview
-                  </a>
-                </div>
-                <div>
-                  <a href="/info" className="hover:opacity-60">
-                    Info
-                  </a>
-                </div>
-              </nav>
-              <div>
+            <div className="flex flex-col gap-6">
+              <p>
+                Malik Laing [b. 2000] is an independent photographer hailing from San Bernardino, California.
+              </p>
+              <p>
+                For years, he has been enveloped in the world of photography, inside and out. His lengthiest project, the community photography space Eclipse is a testament to the communal and personal themes in his work. Some of his material has been publicly featured at the Riverside Art Museum and alongside The Civil Rights Institute of Southern California.
+              </p>
+              <p>
                 <a
-                  href="mailto:Maliklphoto1@gmail.com"
+                  href="https://www.instagram.com/maliklphoto/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="hover:opacity-60"
                 >
-                  Contact
+                  @maliklphoto
                 </a>
-              </div>
+              </p>
             </div>
           </div>
-        </header>
-
-        <section className="w-full flex flex-col gap-[156px] pt-[120px]">
-          <div className="flex flex-col justify-start relative z-10">
-            <div className="flex flex-col md:flex-row gap-[12px] items-start">
-              {/* Malik Laing container - fills available width */}
-              <div className="flex-[0.5] w-full md:w-auto flex flex-row gap-[12px] items-start relative">
-                {/* Container 1: Image aligned to the left */}
-                <div className="relative w-full">
-                  <div
-                    className="w-full relative"
-                    onMouseEnter={() => setIsOverImage(true)}
-                    onMouseLeave={() => setIsOverImage(false)}
-                    style={{
-                      mixBlendMode: isOverImage ? "difference" : "normal",
-                    }}
-                  >
-                    <Image
-                      src="/malik-info.jpg"
-                      alt="Malik Laing"
-                      width={200}
-                      height={200}
-                      priority
-                      className="w-full h-auto shadow-none transition-all duration-300"
-                      style={{
-                        display: "block",
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className={`flex-1 w-full md:w-auto flex flex-col gap-[12px] text-[30px] font-semibold leading-[1.1] tracking-[-0.01em] ${
-                  scrolled ? "text-white" : "text-[#0043e0]"
-                }`}
-                style={{
-                  transition: "color 1500ms ease-in-out",
-                  willChange: "color",
-                }}
-              >
-                {/* Container 1: Text content */}
-                <div className="flex flex-col gap-[12px]">
-                  <div className="flex flex-col md:flex-row md:items-start gap-[12px]">
-                    <div className="flex-1 flex flex-col gap-[24px]">
-                      <p>
-                        Malik Laing [b. 2000] is an independent photographer
-                        hailing from San Bernardino, California.
-                      </p>
-                      <p>
-                        For years, he has been enveloped in the world of
-                        photography, inside and out. His lengthiest project, the
-                        community photography space Eclipse is a testament to
-                        the communal and personal themes in his work. Some of
-                        his material has been publicly featured at the Riverside
-                        Art Museum and alongside The Civil Rights Institute of
-                        Southern California.
-                      </p>
-                      <p>
-                        <a
-                          href="https://www.instagram.com/maliklphoto/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:opacity-60"
-                        >
-                          @maliklphoto
-                        </a>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                {/* Container 2: Empty for now */}
-                <div></div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-    </>
+        </div>
+      </section>
+    </main>
   );
 }

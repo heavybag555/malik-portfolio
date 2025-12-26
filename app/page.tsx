@@ -395,7 +395,7 @@ export default function Home() {
                           className={`transition-colors duration-[1500ms] ${
                             scrolled ? "text-white" : "text-black"
                           }`}
-                          style={{ fontWeight: 550 }}
+                          style={{ fontWeight: 500 }}
                         >
                           {project.title}
                         </span>
@@ -422,7 +422,7 @@ export default function Home() {
                         className={`transition-colors duration-[1500ms] ${
                           scrolled ? "text-[#D0D0D0]" : "text-[#ACACAC]"
                         }`}
-                        style={{ fontWeight: 550 }}
+                        style={{ fontWeight: 500 }}
                       >
                         {project.description}
                       </span>

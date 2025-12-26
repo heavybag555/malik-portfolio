@@ -215,8 +215,8 @@ export default function Lightbox({
           />
         </div>
         <div className="flex flex-col gap-[4px] text-[10px] leading-none tracking-[0.04em] text-center">
-          <span className="text-black" style={{ fontWeight: 550 }}>{currentProject.title}</span>
-          <span className="text-[#ACACAC]" style={{ fontWeight: 550 }}>{currentProject.description}</span>
+          <span className="text-black" style={{ fontWeight: 500 }}>{currentProject.title}</span>
+          <span className="text-[#ACACAC]" style={{ fontWeight: 500 }}>{currentProject.description}</span>
         </div>
       </div>
     </div>

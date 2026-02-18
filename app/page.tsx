@@ -9,15 +9,23 @@ import { useIsDesktop } from "./hooks/useIsDesktop";
 import { libreBaskerville } from "./fonts";
 
 // Fade-in text component
-function FadeInText({ text, className, children }: { text?: string; className?: string; children?: React.ReactNode }) {
+function FadeInText({
+  text,
+  className,
+  children,
+}: {
+  text?: string;
+  className?: string;
+  children?: React.ReactNode;
+}) {
   const [isVisible, setIsVisible] = useState(false);
-  
+
   useEffect(() => {
     // Start fade after a small delay
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, 500);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -26,7 +34,7 @@ function FadeInText({ text, className, children }: { text?: string; className?: 
       className={className}
       style={{
         opacity: isVisible ? 1 : 0,
-        transition: 'opacity 1.2s ease-out',
+        transition: "opacity 1.2s ease-out",
       }}
     >
       {children || text}
@@ -185,7 +193,7 @@ export default function Home() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const index = parseInt(
-              entry.target.getAttribute("data-image-index") || "0"
+              entry.target.getAttribute("data-image-index") || "0",
             );
             setVisibleImages((prev) => new Set(prev).add(index));
           }
@@ -194,7 +202,7 @@ export default function Home() {
       {
         threshold: 0.1,
         rootMargin: "50px",
-      }
+      },
     );
 
     imageElements.forEach((el) => observer.observe(el));
@@ -242,7 +250,7 @@ export default function Home() {
 
   // Create a lookup map for metadata by filename
   const metadataMap = new Map(
-    photoMetadata.map((meta) => [meta.filename, meta])
+    photoMetadata.map((meta) => [meta.filename, meta]),
   );
 
   const projects = photoOrder.map((file, i) => {
@@ -283,7 +291,13 @@ export default function Home() {
           >
             <div className="flex-1">
               <a href="/" className="hover:opacity-60">
-                Malik Laing<span className={`${libreBaskerville.className}`} style={{ fontSize: '12px', letterSpacing: '-0.02em' }}>, 2000</span>
+                Malik Laing
+                <span
+                  className={`${libreBaskerville.className}`}
+                  style={{ fontSize: "12px", letterSpacing: "-0.02em" }}
+                >
+                  , 2000
+                </span>
               </a>
             </div>
             <div className="flex-1 flex justify-end items-start gap-[12px]">
@@ -301,7 +315,7 @@ export default function Home() {
                   // Save current scroll position before navigation
                   sessionStorage.setItem(
                     "homeScrollPosition",
-                    window.scrollY.toString()
+                    window.scrollY.toString(),
                   );
                 }}
               >
@@ -325,7 +339,15 @@ export default function Home() {
                 scrolled ? "text-white" : "text-[#0043e0]"
               }`}
             >
-              <FadeInText>Photographer and director from <span className={libreBaskerville.className} style={{ fontSize: '12px', letterSpacing: '-0.02em' }}>San Bernardino, California.</span></FadeInText>
+              <FadeInText>
+                Photographer and director from{" "}
+                <span
+                  className={libreBaskerville.className}
+                  style={{ fontSize: "12px", letterSpacing: "-0.02em" }}
+                >
+                  San Bernardino, California.
+                </span>
+              </FadeInText>
             </div>
           </div>
           <div className="h-[250px]"></div>

@@ -14,4 +14,3 @@ export const libreBaskerville = Libre_Baskerville({
   variable: "--font-libre-baskerville",
   display: "swap",
 });
-

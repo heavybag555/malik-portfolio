@@ -156,19 +156,17 @@ export default function Lightbox({
   if (!isVisible) return null;
 
   const currentProject = images[displayIndex];
+  if (!currentProject) return null;
 
   // Calculate morph transform
-  let morphStyle: React.CSSProperties = {};
+  let morphTransform = "translate3d(0, 0, 0) scale(1)";
   if (initialImagePosition && !isAnimating) {
     const vw = window.innerWidth;
-    const vh = window.innerHeight;
     const dx = vw / 2 - initialImagePosition.x;
-    const dy = vh / 2 - initialImagePosition.y;
+    const dy = window.innerHeight / 2 - initialImagePosition.y;
     const finalWidth = Math.min(1200, vw * 0.9);
     const scale = finalWidth / initialImagePosition.width;
-    morphStyle = {
-      transform: `translate3d(${dx}px, ${dy}px, 0) scale(${scale})`,
-    };
+    morphTransform = `translate3d(${dx}px, ${dy}px, 0) scale(${scale})`;
   }
 
   return (
@@ -184,11 +182,10 @@ export default function Lightbox({
       <div
         className="flex flex-col items-center gap-3 max-w-[90vw] max-h-[90vh]"
         style={{
-          ...morphStyle,
           transition: isAnimating
             ? "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
             : "none",
-          transform: isAnimating ? "translate3d(0, 0, 0) scale(1)" : morphStyle.transform,
+          transform: isAnimating ? "translate3d(0, 0, 0) scale(1)" : morphTransform,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -205,9 +202,11 @@ export default function Lightbox({
             alt={currentProject.title}
             width={1200}
             height={1200}
+            quality={85}
             className="w-auto h-auto max-w-full max-h-[80vh] object-contain select-none"
             draggable={false}
             priority
+            sizes="90vw"
             style={{
               pointerEvents: "none",
               userSelect: "none",

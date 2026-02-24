@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { libreBaskerville } from "../fonts";
+import { timesBoldItalic } from "../fonts";
 
 interface HeaderProps {
   scrolled: boolean;
@@ -19,10 +19,7 @@ export default function Header({ scrolled, onOverviewClick, showYear = true }: H
         <Link href="/" className="flex-1 hover:opacity-60 transition-opacity">
           Malik Laing
           {showYear && (
-            <span
-              className={libreBaskerville.className}
-              style={{ fontSize: 15, letterSpacing: "-0.02em" }}
-            >
+            <span className={timesBoldItalic.className}>
               , 2000
             </span>
           )}

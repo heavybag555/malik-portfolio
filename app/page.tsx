@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import Lightbox from "./components/Lightbox";
 import CustomCursor from "./components/CustomCursor";
 import photoMetadata from "./photoMetadata.json";
 import { useIsDesktop } from "./hooks/useIsDesktop";
-import { libreBaskerville } from "./fonts";
+import { timesBoldItalic } from "./fonts";
 
 // Fade-in text component
 function FadeInText({
@@ -167,26 +167,34 @@ export default function Home() {
   >("right");
   const [isOverLightboxImage, setIsOverLightboxImage] = useState(false);
 
-  // Smooth scroll to gallery
-  const scrollToGallery = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const galleryElement = document.getElementById("overview");
-    if (galleryElement) {
-      const headerHeight = 80; // Account for fixed header
-      const elementPosition = galleryElement.getBoundingClientRect().top;
-      const offsetPosition =
-        elementPosition + window.pageYOffset - headerHeight;
+  const scrollToGallery = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      const galleryElement = document.getElementById("overview");
+      if (galleryElement) {
+        const headerHeight = 80;
+        const elementPosition = galleryElement.getBoundingClientRect().top;
+        const offsetPosition =
+          elementPosition + window.pageYOffset - headerHeight;
+        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+      }
+    },
+    [],
+  );
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  // Intersection Observer for image fade-in
+  // Intersection Observer for image fade-in (batched to reduce re-renders)
   useEffect(() => {
     const imageElements = document.querySelectorAll("[data-image-index]");
+    let flushTimer: ReturnType<typeof setTimeout> | null = null;
+    const pending = new Set<number>();
+
+    const flush = () => {
+      if (pending.size === 0) return;
+      const toAdd = new Set(pending);
+      pending.clear();
+      setVisibleImages((prev) => new Set([...prev, ...toAdd]));
+      flushTimer = null;
+    };
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -195,73 +203,81 @@ export default function Home() {
             const index = parseInt(
               entry.target.getAttribute("data-image-index") || "0",
             );
-            setVisibleImages((prev) => new Set(prev).add(index));
+            pending.add(index);
           }
         });
+        if (pending.size > 0 && !flushTimer) {
+          flushTimer = setTimeout(flush, 50);
+        }
       },
-      {
-        threshold: 0.1,
-        rootMargin: "50px",
-      },
+      { threshold: 0.05, rootMargin: "80px" },
     );
 
     imageElements.forEach((el) => observer.observe(el));
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (flushTimer) clearTimeout(flushTimer);
+    };
   }, []);
 
-  // Update columns based on screen size
   useEffect(() => {
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const updateColumns = () => {
       const width = window.innerWidth;
-      if (width < 768) {
-        setColumns(2); // Mobile: 2 columns
-      } else if (width < 1024) {
-        setColumns(3); // Tablet: 3 columns
-      } else if (width < 1280) {
-        setColumns(4); // Desktop: 4 columns
-      } else {
-        setColumns(5); // Large desktop: 5 columns
-      }
+      if (width < 768) setColumns(2);
+      else if (width < 1024) setColumns(3);
+      else if (width < 1280) setColumns(4);
+      else setColumns(5);
     };
 
     updateColumns();
-    window.addEventListener("resize", updateColumns);
-    return () => window.removeEventListener("resize", updateColumns);
+    const debouncedResize = () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(updateColumns, 150);
+    };
+    window.addEventListener("resize", debouncedResize);
+    return () => {
+      window.removeEventListener("resize", debouncedResize);
+      if (resizeTimer) clearTimeout(resizeTimer);
+    };
   }, []);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      // Calculate how close we are to the bottom of the page
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      const scrollTop = window.scrollY;
-      const scrolledPercentage = (scrollTop + windowHeight) / documentHeight;
-
-      // Change background when 50% through the page
-      setScrolled(scrolledPercentage > 0.5);
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        const scrollTop = window.scrollY;
+        const scrolledPercentage = (scrollTop + windowHeight) / documentHeight;
+        setScrolled(scrolledPercentage > 0.5);
+        ticking = false;
+      });
     };
 
-    window.addEventListener("scroll", handleScroll);
-    handleScroll(); // Check initial state
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Create a lookup map for metadata by filename
-  const metadataMap = new Map(
-    photoMetadata.map((meta) => [meta.filename, meta]),
-  );
-
-  const projects = photoOrder.map((file, i) => {
-    const metadata = metadataMap.get(file);
-    return {
-      id: i + 1,
-      title: metadata?.title || `Project ${i + 1}`,
-      description: metadata?.description || "Description",
-      image: `/ML-photos/${file}`,
-    };
-  });
+  const projects = useMemo(() => {
+    const metadataMap = new Map(
+      photoMetadata.map((meta) => [meta.filename, meta]),
+    );
+    return photoOrder.map((file, i) => {
+      const metadata = metadataMap.get(file);
+      return {
+        id: i + 1,
+        title: metadata?.title || `Project ${i + 1}`,
+        description: metadata?.description || "Description",
+        image: `/ML-photos/${file}`,
+      };
+    });
+  }, []);
 
   return (
     <>
@@ -275,11 +291,11 @@ export default function Home() {
         />
       )}
       <main
-        className={`w-full min-h-screen p-[12px] pb-[48px] flex flex-col gap-[48px] transition-all duration-[1500ms] ${
+        className={`w-full min-h-screen p-[12px] pb-[48px] flex flex-col gap-[48px] transition-all duration-700 ${
           scrolled ? "bg-[#0043e0]/98" : "bg-white"
         } opacity-100 pointer-events-auto`}
         style={{
-          transition: "background-color 1500ms",
+          transition: "background-color 700ms",
         }}
       >
         {/* Fixed Header */}
@@ -292,10 +308,7 @@ export default function Home() {
             <div className="flex-1">
               <a href="/" className="hover:opacity-60">
                 Malik Laing
-                <span
-                  className={`${libreBaskerville.className}`}
-                  style={{ fontSize: "12px", letterSpacing: "-0.02em" }}
-                >
+                <span className={timesBoldItalic.className}>
                   , 2000
                 </span>
               </a>
@@ -335,16 +348,13 @@ export default function Home() {
           <div className="h-[250px]"></div>
           <div className="md:sticky md:top-[12px] z-40">
             <div
-              className={`text-center text-[12px] leading-none tracking-[0.03em] transition-colors duration-[1500ms] ${
+              className={`text-center text-[12px] leading-none tracking-[0.03em] transition-colors duration-700 ${
                 scrolled ? "text-white" : "text-[#0043e0]"
               }`}
             >
               <FadeInText>
                 Photographer and director from{" "}
-                <span
-                  className={libreBaskerville.className}
-                  style={{ fontSize: "12px", letterSpacing: "-0.02em" }}
-                >
+                <span className={timesBoldItalic.className}>
                   San Bernardino, California.
                 </span>
               </FadeInText>
@@ -390,11 +400,12 @@ export default function Home() {
                         alt={project.title}
                         width={800}
                         height={800}
+                        quality={75}
                         className="w-full h-auto"
                         style={{
                           opacity: isVisible ? 1 : 0,
                           transition:
-                            "opacity 1.6s cubic-bezier(0.4, 0, 0.2, 1)",
+                            "opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
                           transitionDelay: isVisible
                             ? `${transitionDelay}ms`
                             : "0ms",
@@ -406,7 +417,7 @@ export default function Home() {
                       className="flex flex-col gap-[4px] text-[10px] leading-none tracking-[0.04em]"
                       style={{
                         opacity: isVisible ? 1 : 0,
-                        transition: "opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                        transition: "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
                         transitionDelay: isVisible
                           ? `${transitionDelay + 200}ms`
                           : "0ms",
@@ -414,7 +425,7 @@ export default function Home() {
                     >
                       <div className="flex items-center gap-[6px]">
                         <span
-                          className={`transition-colors duration-[1500ms] ${
+                          className={`transition-colors duration-700 ${
                             scrolled ? "text-white" : "text-black"
                           }`}
                           style={{ fontWeight: 500 }}
@@ -433,7 +444,7 @@ export default function Home() {
                               cx="2.5"
                               cy="2.5"
                               r="2.25"
-                              className={`transition-colors duration-[1500ms] ${
+                              className={`transition-colors duration-700 ${
                                 scrolled ? "fill-white" : "fill-black"
                               }`}
                             />
@@ -441,7 +452,7 @@ export default function Home() {
                         </div>
                       </div>
                       <span
-                        className={`transition-colors duration-[1500ms] ${
+                        className={`transition-colors duration-700 ${
                           scrolled ? "text-[#D0D0D0]" : "text-[#ACACAC]"
                         }`}
                         style={{ fontWeight: 500 }}

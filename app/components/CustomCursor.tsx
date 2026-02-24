@@ -125,7 +125,7 @@ export default function CustomCursor({
           boxShadow: scrolled && !lightboxOpen
             ? "0 0 0 1px rgba(0, 0, 0, 0.1)"
             : "0 0 0 1px rgba(255, 255, 255, 0.1)",
-          transition: "background-color 1500ms ease-in-out, opacity 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55), transform 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+          transition: "background-color 700ms ease-in-out, opacity 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55), transform 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
         }}
       />
     </div>

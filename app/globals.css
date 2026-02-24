@@ -9,13 +9,20 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-serif: var(--font-lab-mono), monospace;
+  --font-serif: "Times New Roman", Times, serif;
 }
 
 /* Lenis smooth scroll */
-html.lenis, html.lenis body { height: auto; }
-.lenis.lenis-smooth { scroll-behavior: auto !important; }
-.lenis.lenis-stopped { overflow: hidden; }
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
 
 body {
   background: var(--background);
@@ -32,4 +39,15 @@ body {
 .sticky {
   will-change: transform;
   backface-visibility: hidden;
+}
+
+/* Defer rendering of off-screen gallery items */
+[data-image-index] {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
+}
+
+/* Optimize image rendering */
+img {
+  image-rendering: auto;
 }

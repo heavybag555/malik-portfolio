@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
+import { timesBoldItalic } from "../fonts";
 
 export default function Info() {
   const [scrolled, setScrolled] = useState(false);
@@ -44,17 +45,23 @@ export default function Info() {
         WebkitOverflowScrolling: "touch",
       }}
     >
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 p-3">
+      <header className="fixed top-0 left-0 right-0 z-50 py-[12px] px-[12px]">
         <div
-          className={`w-full flex items-start gap-2 text-[12px] leading-none tracking-[0.02em] transition-colors duration-300 ${scrolled ? "text-white" : "text-[#0043e0]"}`}
+          className={`w-full flex items-start gap-[8px] text-[12px] leading-none tracking-[0.03em] transition-colors duration-300 ${
+            scrolled ? "text-white" : "text-[#0043e0]"
+          }`}
           style={{ opacity: loaded ? 1 : 0, transition: "opacity 1s ease-in-out, color 300ms" }}
         >
           <div className="flex-1">
-            <a href="/" className="hover:opacity-60">Malik Laing</a>
+            <a href="/" className="hover:opacity-60">
+              Malik Laing
+              <span className={timesBoldItalic.className}>
+                , 2000
+              </span>
+            </a>
           </div>
-          <div className="flex-1 flex justify-end gap-3">
-            <a href="/#gallery" className="hover:opacity-60">Overview</a>
+          <div className="flex-1 flex justify-end items-start gap-[12px]">
+            <a href="/" className="hover:opacity-60">Overview</a>
             <a href="/info" className="hover:opacity-60">Info</a>
             <a href="mailto:Maliklphoto1@gmail.com" className="hover:opacity-60">Contact</a>
           </div>
@@ -68,13 +75,15 @@ export default function Info() {
       <section className="w-full flex flex-col gap-[156px]">
         <div className="flex flex-col md:flex-row gap-3 items-start">
           {/* Image */}
-          <div className="flex-[0.5] w-full md:w-auto overflow-hidden">
+          <div className="flex-[0.25] w-full md:w-auto overflow-hidden">
             <Image
               src="/malik-info.jpg"
               alt="Malik Laing"
-              width={200}
-              height={200}
+              width={600}
+              height={600}
+              quality={80}
               priority
+              sizes="(max-width: 768px) 50vw, 20vw"
               className="w-full h-auto transition-all duration-500 ease-out grayscale hover:grayscale-0"
             />
           </div>

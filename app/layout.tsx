@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { labMono } from "./fonts";
 import OverlayWrapper from "./OverlayWrapper";
 import SmoothScroll from "./components/SmoothScroll";
 
@@ -17,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head></head>
-      <body className={`${labMono.variable} antialiased`}>
+      <body className="antialiased">
         <SmoothScroll />
         <OverlayWrapper>{children}</OverlayWrapper>
       </body>

@@ -12,14 +12,19 @@ export default function OverlayWrapper({ children }: { children: React.ReactNode
   useEffect(() => {
     if (!isInfoPage) return;
 
-    // Dynamically import Home to avoid circular dependency
-    import("./page").then((module) => setHomeComponent(() => module.default));
-
-    // Restore scroll position
-    const savedScroll = sessionStorage.getItem("homeScrollPosition");
-    if (savedScroll && backgroundRef.current) {
-      backgroundRef.current.scrollTop = parseInt(savedScroll, 10);
-    }
+    // Lightweight placeholder instead of full Home (100 images) for performance
+    import("./components/BackgroundPlaceholder").then((module) => {
+      setHomeComponent(() => module.default);
+      // Restore scroll after placeholder is rendered
+      const savedScroll = sessionStorage.getItem("homeScrollPosition");
+      if (savedScroll) {
+        requestAnimationFrame(() => {
+          if (backgroundRef.current) {
+            backgroundRef.current.scrollTop = parseInt(savedScroll, 10);
+          }
+        });
+      }
+    });
   }, [isInfoPage]);
 
   if (!isInfoPage) return <>{children}</>;

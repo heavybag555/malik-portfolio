@@ -12,6 +12,73 @@
   --font-serif: "Times New Roman", Times, serif;
 }
 
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================================================
+   TEXT STYLES — edit all site typography here.
+   Classes are ordered from smallest (text-1) to largest (text-5).
+   Every visible text style on the site uses one of these.
+   ========================================================= */
+
+/* text-1 — 10px. Gallery item labels, lightbox caption. */
+.text-1 {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+/* text-2 — 11px. Custom cursor label. */
+.text-2 {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.03em;
+}
+
+/* text-3 — 12px. Header and footer nav text on every page. */
+.text-3 {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+/* text-4 — 15px italic serif accent. Used for ", 2000" and the
+   "San Bernardino, California." tagline accent. */
+.text-4 {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.04em;
+}
+
+/* text-5 — 30px heading. Info page bio. */
+.text-5 {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: -0.01em;
+}
+
+@media (min-width: 768px) {
+  .text-5 {
+    font-size: 24px;
+    line-height: 26px;
+  }
+}
+
 /* Lenis smooth scroll */
 html.lenis,
 html.lenis body {
@@ -22,17 +89,6 @@ html.lenis body {
 }
 .lenis.lenis-stopped {
   overflow: hidden;
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 12px;
-  letter-spacing: 0.01em;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 /* GPU acceleration for smooth animations */
@@ -50,4 +106,22 @@ body {
 /* Optimize image rendering */
 img {
   image-rendering: auto;
+}
+
+/* Crossfade page content between client-side route changes */
+.page-fade-in {
+  animation: pageFadeIn 220ms ease-out;
+}
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-fade-in {
+    animation: none;
+  }
 }

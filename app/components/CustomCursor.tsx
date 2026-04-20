@@ -104,7 +104,7 @@ export default function CustomCursor({
         }}
       >
         <span
-          className="text-[11px] leading-none font-medium tracking-[0.03em]"
+          className="text-2"
           style={{
             color: !isOverLightboxImage ? "black" : "white",
             backgroundColor: !isOverLightboxImage ? "white" : "#000000",

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import OverlayWrapper from "./OverlayWrapper";
 import SmoothScroll from "./components/SmoothScroll";
+import SiteNav from "./components/SiteNav";
+import PageTransition from "./components/PageTransition";
 
 export const metadata: Metadata = {
   title: "malik laing",
@@ -18,7 +20,10 @@ export default function RootLayout({
       <head></head>
       <body className="antialiased">
         <SmoothScroll />
-        <OverlayWrapper>{children}</OverlayWrapper>
+        <SiteNav />
+        <OverlayWrapper>
+          <PageTransition>{children}</PageTransition>
+        </OverlayWrapper>
       </body>
     </html>
   );

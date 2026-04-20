@@ -5,12 +5,8 @@ import { useEffect, useState } from "react";
 import Lightbox from "../components/Lightbox";
 import CustomCursor from "../components/CustomCursor";
 import { useIsDesktop } from "../hooks/useIsDesktop";
-import { timesBoldItalic } from "../fonts";
 import type { Project } from "@/lib/content";
 
-const BRAND_NAME = "Malik Laing";
-const BRAND_SUFFIX = ", 2000";
-const CONTACT_EMAIL = "Maliklphoto1@gmail.com";
 const TAGLINE_LEAD = "Photographer and director from";
 const TAGLINE_ACCENT = "San Bernardino, California.";
 
@@ -20,16 +16,10 @@ interface GalleryClientProps {
 
 export default function GalleryClient({ projects }: GalleryClientProps) {
   const isDesktop = useIsDesktop();
-  const [scrolled, setScrolled] = useState(false);
+  const scrolled = false;
   const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set());
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [initialImagePosition, setInitialImagePosition] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
   const [cursorStartPos, setCursorStartPos] = useState<{
     x: number;
     y: number;
@@ -39,9 +29,6 @@ export default function GalleryClient({ projects }: GalleryClientProps) {
     "left" | "right"
   >("right");
   const [isOverLightboxImage, setIsOverLightboxImage] = useState(false);
-  const [hoveredImageIndex, setHoveredImageIndex] = useState<number | null>(
-    null,
-  );
 
   useEffect(() => {
     const imageElements = document.querySelectorAll("[data-image-index]");
@@ -102,27 +89,6 @@ export default function GalleryClient({ projects }: GalleryClientProps) {
     };
   }, []);
 
-  useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const windowHeight = window.innerHeight;
-        const documentHeight = document.documentElement.scrollHeight;
-        const scrollTop = window.scrollY;
-        const scrolledPercentage = (scrollTop + windowHeight) / documentHeight;
-        setScrolled(scrolledPercentage > 0.5);
-        ticking = false;
-      });
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
     <>
       {isDesktop && lightboxOpen && (
@@ -134,107 +100,26 @@ export default function GalleryClient({ projects }: GalleryClientProps) {
           initialPosition={cursorStartPos}
         />
       )}
-      <main
-        className={`w-full min-h-screen px-[20px] pt-[60px] pb-[60px] flex flex-col gap-[48px] transition-all duration-700 ${
-          scrolled ? "bg-[#0043e0]/98" : "bg-white"
-        } opacity-100 pointer-events-auto`}
-        style={{
-          transition: "background-color 700ms",
-        }}
-      >
-        {/* Fixed Header */}
-        <header className="fixed top-0 left-0 right-0 z-50 px-[20px] py-[20px]">
-          <div
-            className={`w-full grid grid-cols-6 gap-x-[20px] items-start text-[12px] leading-none tracking-[0.03em] transition-colors duration-300 ${
-              scrolled ? "text-white" : "text-[#0043e0]"
-            }`}
-          >
-            <div className="col-start-1">
-              <a href="/" className="hover:opacity-60">
-                {BRAND_NAME}
-                <span className={timesBoldItalic.className}>
-                  {BRAND_SUFFIX}
-                </span>
-              </a>
-            </div>
-            <div className="col-start-4 flex items-start gap-[12px]">
-              <a href="/" className="hover:opacity-60">
-                Home
-              </a>
-              <a href="/gallery" className="hover:opacity-60">
-                Gallery
-              </a>
-              <a
-                href="/info"
-                className="hover:opacity-60"
-                onClick={() => {
-                  sessionStorage.setItem(
-                    "homeScrollPosition",
-                    window.scrollY.toString(),
-                  );
-                }}
-              >
-                Info
-              </a>
-            </div>
-            <div className="col-start-6 flex justify-end">
-              <a
-                href={`mailto:${CONTACT_EMAIL}`}
-                className="hover:opacity-60"
-              >
-                Contact
-              </a>
-            </div>
-          </div>
-        </header>
-
+      <main className="w-full min-h-screen px-[20px] pt-[60px] pb-[60px] flex flex-col gap-[48px] bg-white opacity-100 pointer-events-auto">
         <section className="w-full flex flex-col gap-0">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-[20px] gap-y-[48px] items-end">
             {projects.map((project, i) => {
               const columnIndex = i % columns;
               const isVisible = visibleImages.has(i);
               const transitionDelay = columnIndex * 100;
-              const isDimmed =
-                hoveredImageIndex !== null && hoveredImageIndex !== i;
 
               return (
                 <div
                   key={project.id ?? i}
                   data-image-index={i}
                   className="flex flex-col gap-[8px] group cursor-pointer"
-                  onMouseEnter={() => setHoveredImageIndex(i)}
-                  onMouseLeave={() =>
-                    setHoveredImageIndex((current) =>
-                      current === i ? null : current,
-                    )
-                  }
                   onClick={(e) => {
                     setCursorStartPos({ x: e.clientX, y: e.clientY });
-
-                    const imageElement = e.currentTarget.querySelector("img");
-                    if (imageElement) {
-                      const rect = imageElement.getBoundingClientRect();
-                      setInitialImagePosition({
-                        x: rect.left + rect.width / 2,
-                        y: rect.top + rect.height / 2,
-                        width: rect.width,
-                        height: rect.height,
-                      });
-                    }
                     setCurrentImageIndex(i);
                     setLightboxOpen(true);
-                    setHoveredImageIndex(null);
                   }}
                 >
-                  <div
-                    className="w-full relative"
-                    style={{
-                      opacity: isDimmed ? 0.1 : 1,
-                      filter: isDimmed ? "grayscale(100%)" : "grayscale(0%)",
-                      transition:
-                        "opacity 0.3s ease-out, filter 0.3s ease-out",
-                    }}
-                  >
+                  <div className="w-full relative">
                     <Image
                       src={project.image}
                       alt={project.title}
@@ -254,7 +139,7 @@ export default function GalleryClient({ projects }: GalleryClientProps) {
                     />
                   </div>
                   <div
-                    className="flex flex-col gap-[4px] text-[10px] leading-none tracking-[0.04em]"
+                    className="text-1 flex flex-col gap-[4px]"
                     style={{
                       opacity: isVisible ? 1 : 0,
                       transition: "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -268,7 +153,6 @@ export default function GalleryClient({ projects }: GalleryClientProps) {
                         className={`transition-colors duration-700 ${
                           scrolled ? "text-white" : "text-black"
                         }`}
-                        style={{ fontWeight: 500 }}
                       >
                         {project.title}
                       </span>
@@ -295,7 +179,6 @@ export default function GalleryClient({ projects }: GalleryClientProps) {
                       className={`transition-colors duration-700 ${
                         scrolled ? "text-[#D0D0D0]" : "text-[#ACACAC]"
                       }`}
-                      style={{ fontWeight: 500 }}
                     >
                       {project.description}
                     </span>
@@ -307,15 +190,12 @@ export default function GalleryClient({ projects }: GalleryClientProps) {
         </section>
       </main>
       {/* Fixed Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 z-50 px-[20px] py-[20px] pointer-events-none">
-        <div
-          className={`w-full grid grid-cols-6 gap-x-[20px] items-end text-[12px] leading-none tracking-[0.03em] transition-colors duration-300 ${
-            scrolled ? "text-white" : "text-[#0043e0]"
-          }`}
-        >
+      <footer className="fixed bottom-0 left-0 right-0 z-50 px-[20px] py-[20px] pointer-events-none mix-blend-difference text-white">
+        <div className="text-3 w-full grid grid-cols-6 gap-x-[20px] items-end">
           <div className="col-start-1 pointer-events-auto">
-            {TAGLINE_LEAD}{" "}
-            <span className={timesBoldItalic.className}>{TAGLINE_ACCENT}</span>
+            {TAGLINE_LEAD}
+            <br />
+            <span className="text-4">{TAGLINE_ACCENT}</span>
           </div>
           <div className="col-start-6 flex justify-end pointer-events-auto">
             © 2026
@@ -329,11 +209,9 @@ export default function GalleryClient({ projects }: GalleryClientProps) {
         onClose={() => {
           setLightboxOpen(false);
           setIsOverLightboxImage(false);
-          setTimeout(() => setInitialImagePosition(null), 300);
         }}
         onNavigate={(index) => setCurrentImageIndex(index)}
         scrolled={scrolled}
-        initialImagePosition={initialImagePosition}
         onCursorSideChange={isDesktop ? setLightboxCursorSide : undefined}
         onImageHoverChange={isDesktop ? setIsOverLightboxImage : undefined}
       />

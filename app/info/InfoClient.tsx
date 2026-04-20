@@ -4,8 +4,6 @@ import Image from "next/image";
 import ArrowUpRight from "../components/ArrowUpRight";
 
 const CONTACT_EMAIL = "maliklphoto1@gmail.com";
-const TAGLINE_LEAD = "Photographer and director from";
-const TAGLINE_ACCENT = "San Bernardino, California.";
 
 const PORTRAIT_SRC = "/malik-info.jpg";
 const PORTRAIT_ALT = "Malik Laing";
@@ -21,7 +19,7 @@ const INSTAGRAM_URL = "https://www.instagram.com/maliklphoto/";
 export default function InfoClient() {
   return (
     <>
-      <main className="fixed inset-0 h-full w-full overflow-y-auto overflow-x-hidden overscroll-contain bg-white lg:overflow-hidden">
+      <main className="fixed inset-0 h-full w-full overflow-hidden bg-white">
         {/* Bio — flows in document on mobile/tablet, absolute on desktop */}
         <div className="relative z-40 px-[20px] pt-[72px] lg:absolute lg:top-0 lg:left-0 lg:right-0 lg:pt-[60px]">
           <div className="w-full grid grid-cols-6 gap-x-[20px] items-start">
@@ -73,11 +71,6 @@ export default function InfoClient() {
       {/* Desktop Footer — lifted out of <main> so mix-blend-difference composites correctly */}
       <footer className="hidden lg:block fixed bottom-0 left-0 right-0 z-[60] px-[20px] py-[20px] pointer-events-none">
         <div className="text-3 w-full grid grid-cols-6 gap-x-[20px] items-end">
-          <div className="col-start-1 pointer-events-auto mix-blend-difference text-white">
-            {TAGLINE_LEAD}
-            <br />
-            <span className="text-4">{TAGLINE_ACCENT}</span>
-          </div>
           <div className="col-start-4 pointer-events-auto">
             <Image
               src={PORTRAIT_SRC}
@@ -117,12 +110,7 @@ export default function InfoClient() {
       {/* Mobile/tablet Footer — lifted out of <main> so mix-blend-difference composites correctly */}
       <footer className="lg:hidden fixed bottom-0 left-0 right-0 z-[60] px-[20px] py-[20px] pointer-events-none">
         <div className="text-3 w-full grid grid-cols-2 gap-x-[20px] items-end">
-          <div className="min-w-0 pointer-events-auto mix-blend-difference text-white">
-            {TAGLINE_LEAD}
-            <br />
-            <span className="text-4">{TAGLINE_ACCENT}</span>
-          </div>
-          <div className="flex justify-end pointer-events-auto mix-blend-difference text-white">
+          <div className="col-start-2 flex justify-end pointer-events-auto mix-blend-difference text-white">
             © 2026
           </div>
         </div>

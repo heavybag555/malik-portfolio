@@ -20,7 +20,7 @@ const INSTAGRAM_URL = "https://www.instagram.com/maliklphoto/";
 
 export default function InfoClient() {
   return (
-    <main className="relative min-h-screen w-full bg-white lg:fixed lg:inset-0 lg:h-full lg:min-h-0 lg:overflow-hidden">
+    <main className="fixed inset-0 h-full w-full overflow-y-auto overflow-x-hidden overscroll-contain bg-white lg:overflow-hidden">
       {/* Bio — flows in document on mobile/tablet, absolute on desktop */}
       <div className="relative z-40 px-[20px] pt-[72px] lg:absolute lg:top-0 lg:left-0 lg:right-0 lg:pt-[60px]">
         <div className="w-full grid grid-cols-6 gap-x-[20px] items-start">

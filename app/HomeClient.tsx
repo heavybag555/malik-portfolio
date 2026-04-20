@@ -20,6 +20,7 @@ interface HomeClientProps {
 
 export default function HomeClient({ projects }: HomeClientProps) {
   const isDesktop = useIsDesktop();
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const [thumbCount, setThumbCount] = useState<number>(THUMB_COUNT_DESKTOP);
   const [activeIndex, setActiveIndex] = useState<number>(0);
 
@@ -37,9 +38,16 @@ export default function HomeClient({ projects }: HomeClientProps) {
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
-      if (w < 768) setThumbCount(THUMB_COUNT_MOBILE);
-      else if (w < 1024) setThumbCount(THUMB_COUNT_TABLET);
-      else setThumbCount(THUMB_COUNT_DESKTOP);
+      if (w < 768) {
+        setThumbCount(THUMB_COUNT_MOBILE);
+        setIsMobile(true);
+      } else if (w < 1024) {
+        setThumbCount(THUMB_COUNT_TABLET);
+        setIsMobile(false);
+      } else {
+        setThumbCount(THUMB_COUNT_DESKTOP);
+        setIsMobile(false);
+      }
     };
     update();
     window.addEventListener("resize", update);
@@ -58,6 +66,7 @@ export default function HomeClient({ projects }: HomeClientProps) {
   const activeProject = thumbs[activeIndex] ?? thumbs[0];
 
   const openLightboxAt = (index: number, e?: { clientX: number; clientY: number }) => {
+    if (isMobile) return;
     if (e) setCursorStartPos({ x: e.clientX, y: e.clientY });
     setLightboxIndex(index);
     setLightboxOpen(true);
@@ -78,10 +87,12 @@ export default function HomeClient({ projects }: HomeClientProps) {
         {/* Background: active image fills the viewport height.
             Native <img> with eager loading so hover swaps are instant once loaded. */}
         <div
-          className="absolute inset-0 cursor-pointer"
-          onClick={(e) => openLightboxAt(activeIndex, e)}
-          role="button"
-          aria-label={`Open ${activeProject?.title ?? "image"}`}
+          className={`absolute inset-0 ${isMobile ? "" : "cursor-pointer"}`}
+          onClick={isMobile ? undefined : (e) => openLightboxAt(activeIndex, e)}
+          role={isMobile ? undefined : "button"}
+          aria-label={
+            isMobile ? undefined : `Open ${activeProject?.title ?? "image"}`
+          }
         >
           {thumbs.map((project, i) => (
             // eslint-disable-next-line @next/next/no-img-element
@@ -117,16 +128,20 @@ export default function HomeClient({ projects }: HomeClientProps) {
                 onFocus={() => setActiveIndex(i)}
                 onClick={(e) => {
                   setActiveIndex(i);
-                  openLightboxAt(i, e);
+                  if (!isMobile) openLightboxAt(i, e);
                 }}
-                className="flex-shrink-0 block cursor-pointer focus:outline-none h-[48px] md:h-[64px] lg:h-[72px]"
+                className={`flex-shrink-0 block focus:outline-none h-[48px] md:h-[64px] lg:h-[72px] ${
+                  isMobile ? "" : "cursor-pointer"
+                }`}
+                aria-label={
+                  isMobile ? project.title : `Open ${project.title}`
+                }
                 style={{
                   opacity: isActive ? 1 : 0.2,
                   filter: isActive ? "grayscale(0%)" : "grayscale(100%)",
                   transition:
                     "opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), filter 400ms cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
-                aria-label={`Open ${project.title}`}
               >
                 <Image
                   src={project.image}
@@ -144,13 +159,13 @@ export default function HomeClient({ projects }: HomeClientProps) {
 
         {/* Fixed Footer */}
         <footer className="fixed bottom-0 left-0 right-0 z-50 px-[20px] py-[20px] pointer-events-none mix-blend-difference text-white">
-          <div className="text-3 w-full grid grid-cols-6 gap-x-[20px] items-end">
-            <div className="col-start-1 pointer-events-auto">
+          <div className="text-3 w-full grid grid-cols-2 lg:grid-cols-6 gap-x-[20px] items-end">
+            <div className="col-start-1 min-w-0 pointer-events-auto">
               {TAGLINE_LEAD}
               <br />
               <span className="text-4">{TAGLINE_ACCENT}</span>
             </div>
-            <div className="col-start-6 flex justify-end pointer-events-auto">
+            <div className="col-start-2 flex justify-end pointer-events-auto lg:col-start-6">
               © 2026
             </div>
           </div>

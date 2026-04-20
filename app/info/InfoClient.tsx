@@ -114,13 +114,13 @@ export default function InfoClient() {
 
       {/* Mobile/tablet Footer — fixed tagline + © only */}
       <footer className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-[20px] py-[20px] pointer-events-none">
-        <div className="text-3 w-full flex items-end justify-between gap-[20px]">
-          <div className="pointer-events-auto mix-blend-difference text-white">
+        <div className="text-3 w-full grid grid-cols-2 gap-x-[20px] items-end">
+          <div className="min-w-0 pointer-events-auto mix-blend-difference text-white">
             {TAGLINE_LEAD}
             <br />
             <span className="text-4">{TAGLINE_ACCENT}</span>
           </div>
-          <div className="pointer-events-auto mix-blend-difference text-white">
+          <div className="flex justify-end pointer-events-auto mix-blend-difference text-white">
             © 2026
           </div>
         </div>

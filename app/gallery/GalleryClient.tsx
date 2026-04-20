@@ -191,13 +191,13 @@ export default function GalleryClient({ projects }: GalleryClientProps) {
       </main>
       {/* Fixed Footer */}
       <footer className="fixed bottom-0 left-0 right-0 z-50 px-[20px] py-[20px] pointer-events-none mix-blend-difference text-white">
-        <div className="text-3 w-full grid grid-cols-6 gap-x-[20px] items-end">
-          <div className="col-start-1 pointer-events-auto">
+        <div className="text-3 w-full grid grid-cols-2 lg:grid-cols-6 gap-x-[20px] items-end">
+          <div className="col-start-1 min-w-0 pointer-events-auto">
             {TAGLINE_LEAD}
             <br />
             <span className="text-4">{TAGLINE_ACCENT}</span>
           </div>
-          <div className="col-start-6 flex justify-end pointer-events-auto">
+          <div className="col-start-2 flex justify-end pointer-events-auto lg:col-start-6">
             © 2026
           </div>
         </div>

@@ -1,17 +1,14 @@
 /**
  * Content fetching layer.
  *
- * Only the gallery photos come from Sanity. If Sanity is not configured (no
- * project id / dataset in env) the helper falls back to the bundled local
- * metadata + `public/ML-photos/` assets so the site still renders.
+ * Gallery photos are sourced exclusively from Sanity. If Sanity is not
+ * configured or the fetch fails, the gallery renders empty.
  */
 
 import { client, isSanityConfigured, urlFor } from "./sanity";
 import { galleryQuery } from "./queries";
-import photoMetadata from "@/app/photoMetadata.json";
-import { photoOrder } from "@/data/photoOrder";
 
-// Shape consumed by the home gallery. Matches the pre-migration Project type.
+// Shape consumed by the home gallery.
 export interface Project {
   id: number;
   title: string;
@@ -19,28 +16,6 @@ export interface Project {
   image: string;
   width?: number;
   height?: number;
-}
-
-// ---- Local fallback --------------------------------------------------------
-
-/**
- * Build projects from the bundled JSON + filename list. Used when Sanity is
- * not configured. Remove once the local assets are deleted post-verification.
- */
-function buildLocalProjects(): Project[] {
-  type Meta = { filename: string; title?: string; description?: string };
-  const metaMap = new Map<string, Meta>(
-    (photoMetadata as Meta[]).map((m) => [m.filename, m])
-  );
-  return photoOrder.map((file, i) => {
-    const meta = metaMap.get(file);
-    return {
-      id: i + 1,
-      title: meta?.title ?? `Project ${i + 1}`,
-      description: meta?.description ?? "Description",
-      image: `/ML-photos/${file}`,
-    };
-  });
 }
 
 // ---- Raw Sanity response shapes -------------------------------------------
@@ -91,17 +66,20 @@ function buildImageUrl(image: RawImage | undefined, maxWidth = 1600): string {
 // ---- Public fetcher --------------------------------------------------------
 
 export async function getGalleryProjects(): Promise<Project[]> {
-  if (!isSanityConfigured || !client) return buildLocalProjects();
+  if (!isSanityConfigured || !client) {
+    console.warn("[sanity] not configured — gallery will render empty");
+    return [];
+  }
 
   let raw: RawGallery | null = null;
   try {
     raw = await client.fetch<RawGallery | null>(galleryQuery);
   } catch (err) {
-    console.warn("[sanity] gallery fetch failed, using local fallback:", err);
-    return buildLocalProjects();
+    console.warn("[sanity] gallery fetch failed:", err);
+    return [];
   }
   if (!raw || !Array.isArray(raw.photos) || raw.photos.length === 0) {
-    return buildLocalProjects();
+    return [];
   }
 
   const projects: Project[] = [];

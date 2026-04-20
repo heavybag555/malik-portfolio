@@ -19,9 +19,8 @@ npm run dev            # http://localhost:3001
 # Studio: http://localhost:3001/studio
 ```
 
-If `NEXT_PUBLIC_SANITY_PROJECT_ID` is not set, the site falls back to the
-bundled local copy (`app/photoMetadata.json` + `public/ML-photos`) so the
-UI still renders.
+If `NEXT_PUBLIC_SANITY_PROJECT_ID` is not set, the gallery renders empty —
+all gallery photos live in Sanity.
 
 ## Environment variables
 
@@ -31,26 +30,16 @@ Copy `.env.example` → `.env.local` and fill in:
 |-----------------------------------|----------------|-------|
 | `NEXT_PUBLIC_SANITY_PROJECT_ID`   | local + Vercel | Public; from sanity.io/manage |
 | `NEXT_PUBLIC_SANITY_DATASET`      | local + Vercel | `production` |
-| `SANITY_TOKEN`                    | local only     | Editor token for `npm run seed:sanity` and `npm run cleanup:sanity`. **Do not** add to Vercel. |
+| `SANITY_TOKEN`                    | local only     | Editor token for `npm run cleanup:sanity`. **Do not** add to Vercel. |
 
-## Sanity setup (one-time)
+## Sanity setup
 
 1. Create a project at [sanity.io/manage](https://sanity.io/manage). Note the project ID.
 2. In that project → **API** → **CORS origins**, add (with "Allow credentials" enabled):
    - `http://localhost:3001`
    - `https://<your-vercel-domain>`
-3. In **API** → **Tokens**, create a token with role **Editor**. Copy it to `.env.local` as `SANITY_TOKEN`.
-4. Seed the dataset from the current local assets:
-
-   ```bash
-   npm run seed:sanity
-   ```
-
-   This uploads every photo in `public/ML-photos/` (ordered by
-   `data/photoOrder.ts`) and creates the `homePage` document. Safe to
-   re-run — it upserts.
-
-5. Open `/studio` to edit captions / reorder / add photos.
+3. (Optional, for local maintenance) In **API** → **Tokens**, create a token with role **Editor** and copy it to `.env.local` as `SANITY_TOKEN`.
+4. Open `/studio` to add / edit captions / reorder photos.
 
 ## Editor model
 

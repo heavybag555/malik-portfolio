@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed:sanity": "tsx scripts/seed-sanity.ts",
     "cleanup:sanity": "tsx scripts/cleanup-sanity.ts"
   },
   "dependencies": {

@@ -14,6 +14,10 @@ const THUMB_COUNT_DESKTOP = 24;
 const THUMB_COUNT_TABLET = 12;
 const THUMB_COUNT_MOBILE = 12;
 
+const THUMB_HEIGHT_DESKTOP = 72;
+const THUMB_HEIGHT_TABLET = 64;
+const THUMB_HEIGHT_MOBILE = 48;
+
 interface HomeClientProps {
   projects: Project[];
 }
@@ -21,7 +25,9 @@ interface HomeClientProps {
 export default function HomeClient({ projects }: HomeClientProps) {
   const isDesktop = useIsDesktop();
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [thumbCount, setThumbCount] = useState<number>(THUMB_COUNT_DESKTOP);
+  const [maxThumbs, setMaxThumbs] = useState<number>(THUMB_COUNT_DESKTOP);
+  const [thumbHeight, setThumbHeight] = useState<number>(THUMB_HEIGHT_DESKTOP);
+  const [viewportWidth, setViewportWidth] = useState<number>(0);
   const [activeIndex, setActiveIndex] = useState<number>(0);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -38,14 +44,18 @@ export default function HomeClient({ projects }: HomeClientProps) {
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
+      setViewportWidth(w);
       if (w < 768) {
-        setThumbCount(THUMB_COUNT_MOBILE);
+        setMaxThumbs(THUMB_COUNT_MOBILE);
+        setThumbHeight(THUMB_HEIGHT_MOBILE);
         setIsMobile(true);
       } else if (w < 1024) {
-        setThumbCount(THUMB_COUNT_TABLET);
+        setMaxThumbs(THUMB_COUNT_TABLET);
+        setThumbHeight(THUMB_HEIGHT_TABLET);
         setIsMobile(false);
       } else {
-        setThumbCount(THUMB_COUNT_DESKTOP);
+        setMaxThumbs(THUMB_COUNT_DESKTOP);
+        setThumbHeight(THUMB_HEIGHT_DESKTOP);
         setIsMobile(false);
       }
     };
@@ -54,10 +64,23 @@ export default function HomeClient({ projects }: HomeClientProps) {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  const thumbs = useMemo(
-    () => projects.slice(0, thumbCount),
-    [projects, thumbCount],
-  );
+  // Fit as many thumbnails as possible across the full viewport width at the
+  // current row height, preserving each image's natural aspect ratio. This
+  // guarantees the strip spans the entire page and never needs to scroll.
+  const thumbs = useMemo(() => {
+    const pool = projects.slice(0, maxThumbs);
+    if (!viewportWidth) return pool;
+    const fitted: Project[] = [];
+    let used = 0;
+    for (const p of pool) {
+      const ar = p.width && p.height ? p.width / p.height : 1;
+      const w = thumbHeight * ar;
+      if (used + w > viewportWidth) break;
+      used += w;
+      fitted.push(p);
+    }
+    return fitted.length > 0 ? fitted : pool.slice(0, 1);
+  }, [projects, maxThumbs, thumbHeight, viewportWidth]);
 
   if (activeIndex >= thumbs.length && activeIndex !== 0) {
     setActiveIndex(0);
@@ -111,10 +134,9 @@ export default function HomeClient({ projects }: HomeClientProps) {
           ))}
         </div>
 
-        {/* Fixed thumbnail row — ignores horizontal page padding */}
+        {/* Fixed thumbnail row — spans the full viewport width, no scrolling */}
         <div
-          className="fixed left-0 right-0 top-1/2 -translate-y-1/2 z-40 flex items-center overflow-x-auto overflow-y-hidden scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          style={{ WebkitOverflowScrolling: "touch" }}
+          className="fixed left-0 right-0 top-1/2 -translate-y-1/2 z-40 flex items-center justify-between overflow-hidden"
           aria-label="Featured photos"
         >
           {thumbs.map((project, i) => {

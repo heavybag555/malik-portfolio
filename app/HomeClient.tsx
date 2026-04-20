@@ -1,44 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, useCallback } from "react";
-import Lightbox from "./components/Lightbox";
-import CustomCursor from "./components/CustomCursor";
-import { useIsDesktop } from "./hooks/useIsDesktop";
+import { useEffect, useMemo, useState } from "react";
 import { timesBoldItalic } from "./fonts";
 import type { Project } from "@/lib/content";
-
-// Fade-in text component
-function FadeInText({
-  text,
-  className,
-  children,
-}: {
-  text?: string;
-  className?: string;
-  children?: React.ReactNode;
-}) {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  return (
-    <span
-      className={className}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transition: "opacity 1.2s ease-out",
-      }}
-    >
-      {children || text}
-    </span>
-  );
-}
 
 const BRAND_NAME = "Malik Laing";
 const BRAND_SUFFIX = ", 2000";
@@ -46,350 +11,150 @@ const CONTACT_EMAIL = "Maliklphoto1@gmail.com";
 const TAGLINE_LEAD = "Photographer and director from";
 const TAGLINE_ACCENT = "San Bernardino, California.";
 
+const THUMB_COUNT_DESKTOP = 24;
+const THUMB_COUNT_TABLET = 12;
+const THUMB_COUNT_MOBILE = 12;
+
 interface HomeClientProps {
   projects: Project[];
 }
 
 export default function HomeClient({ projects }: HomeClientProps) {
-  const isDesktop = useIsDesktop();
-  const [scrolled, setScrolled] = useState(false);
-  const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set());
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [initialImagePosition, setInitialImagePosition] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
-  const [cursorStartPos, setCursorStartPos] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-  const [columns, setColumns] = useState(4);
-  const [lightboxCursorSide, setLightboxCursorSide] = useState<
-    "left" | "right"
-  >("right");
-  const [isOverLightboxImage, setIsOverLightboxImage] = useState(false);
-  const [hoveredImageIndex, setHoveredImageIndex] = useState<number | null>(
-    null,
-  );
-
-  const scrollToGallery = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>) => {
-      e.preventDefault();
-      const galleryElement = document.getElementById("overview");
-      if (galleryElement) {
-        const headerHeight = 80;
-        const elementPosition = galleryElement.getBoundingClientRect().top;
-        const offsetPosition =
-          elementPosition + window.pageYOffset - headerHeight;
-        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
-      }
-    },
-    [],
-  );
-
-  // Intersection Observer for image fade-in (batched to reduce re-renders)
-  useEffect(() => {
-    const imageElements = document.querySelectorAll("[data-image-index]");
-    let flushTimer: ReturnType<typeof setTimeout> | null = null;
-    const pending = new Set<number>();
-
-    const flush = () => {
-      if (pending.size === 0) return;
-      const toAdd = new Set(pending);
-      pending.clear();
-      setVisibleImages((prev) => new Set([...prev, ...toAdd]));
-      flushTimer = null;
-    };
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const index = parseInt(
-              entry.target.getAttribute("data-image-index") || "0",
-            );
-            pending.add(index);
-          }
-        });
-        if (pending.size > 0 && !flushTimer) {
-          flushTimer = setTimeout(flush, 50);
-        }
-      },
-      { threshold: 0.05, rootMargin: "80px" },
-    );
-
-    imageElements.forEach((el) => observer.observe(el));
-
-    return () => {
-      observer.disconnect();
-      if (flushTimer) clearTimeout(flushTimer);
-    };
-  }, [projects.length]);
+  const [thumbCount, setThumbCount] = useState<number>(THUMB_COUNT_DESKTOP);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
 
   useEffect(() => {
-    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
-    const updateColumns = () => {
-      const width = window.innerWidth;
-      if (width < 768) setColumns(2);
-      else if (width < 1024) setColumns(3);
-      else if (width < 1280) setColumns(4);
-      else setColumns(5);
+    const update = () => {
+      const w = window.innerWidth;
+      if (w < 768) setThumbCount(THUMB_COUNT_MOBILE);
+      else if (w < 1024) setThumbCount(THUMB_COUNT_TABLET);
+      else setThumbCount(THUMB_COUNT_DESKTOP);
     };
-
-    updateColumns();
-    const debouncedResize = () => {
-      if (resizeTimer) clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(updateColumns, 150);
-    };
-    window.addEventListener("resize", debouncedResize);
-    return () => {
-      window.removeEventListener("resize", debouncedResize);
-      if (resizeTimer) clearTimeout(resizeTimer);
-    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   }, []);
 
+  const thumbs = useMemo(
+    () => projects.slice(0, thumbCount),
+    [projects, thumbCount],
+  );
+
   useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const windowHeight = window.innerHeight;
-        const documentHeight = document.documentElement.scrollHeight;
-        const scrollTop = window.scrollY;
-        const scrolledPercentage = (scrollTop + windowHeight) / documentHeight;
-        setScrolled(scrolledPercentage > 0.5);
-        ticking = false;
-      });
-    };
+    if (activeIndex >= thumbs.length) setActiveIndex(0);
+  }, [thumbs.length, activeIndex]);
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const activeProject = thumbs[activeIndex] ?? thumbs[0];
 
   return (
-    <>
-      {isDesktop && lightboxOpen && (
-        <CustomCursor
-          scrolled={scrolled}
-          lightboxOpen={lightboxOpen}
-          cursorSide={lightboxCursorSide}
-          isOverLightboxImage={isOverLightboxImage}
-          initialPosition={cursorStartPos}
-        />
-      )}
-      <main
-        className={`w-full min-h-screen p-[12px] pb-[48px] flex flex-col gap-[48px] transition-all duration-700 ${
-          scrolled ? "bg-[#0043e0]/98" : "bg-white"
-        } opacity-100 pointer-events-auto`}
-        style={{
-          transition: "background-color 700ms",
-        }}
-      >
-        {/* Fixed Header */}
-        <header className="fixed top-0 left-0 right-0 z-50 py-[12px] px-[12px]">
-          <div
-            className={`w-full flex items-start gap-[8px] text-[12px] leading-none tracking-[0.03em] transition-colors duration-300 ${
-              scrolled ? "text-white" : "text-[#0043e0]"
-            }`}
-          >
-            <div className="flex-1">
-              <a href="/" className="hover:opacity-60">
-                {BRAND_NAME}
-                <span className={timesBoldItalic.className}>
-                  {BRAND_SUFFIX}
-                </span>
-              </a>
-            </div>
-            <div className="flex-1 flex justify-end items-start gap-[12px]">
-              <a
-                href="#overview"
-                onClick={scrollToGallery}
-                className="hover:opacity-60"
-              >
-                Overview
-              </a>
-              <a
-                href="/info"
-                className="hover:opacity-60"
-                onClick={() => {
-                  // Save current scroll position before navigation
-                  sessionStorage.setItem(
-                    "homeScrollPosition",
-                    window.scrollY.toString(),
-                  );
-                }}
-              >
-                Info
-              </a>
-              <a
-                href={`mailto:${CONTACT_EMAIL}`}
-                className="hover:opacity-60"
-              >
-                Contact
-              </a>
-            </div>
-          </div>
-        </header>
+    <main className="fixed inset-0 w-full h-full overflow-hidden bg-black">
+      {/* Background: active image fills the viewport height.
+          Native <img> with eager loading so hover swaps are instant once loaded. */}
+      <div className="absolute inset-0">
+        {thumbs.map((project, i) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={project.id ?? i}
+            src={project.image}
+            alt={project.title}
+            loading="eager"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-contain"
+            style={{
+              opacity: i === activeIndex ? 1 : 0,
+              transition: "opacity 600ms cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          />
+        ))}
+      </div>
 
-        <section className="w-full flex flex-col gap-0">
-          <div className="h-[250px]"></div>
-          <div className="md:sticky md:top-[12px] z-40">
-            <div
-              className={`text-center text-[12px] leading-none tracking-[0.03em] transition-colors duration-700 ${
-                scrolled ? "text-white" : "text-[#0043e0]"
-              }`}
+      {/* Fixed Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 px-[20px] py-[20px] mix-blend-difference text-white">
+        <div className="w-full grid grid-cols-6 gap-x-[20px] items-start text-[12px] leading-none tracking-[0.03em]">
+          <div className="col-start-1">
+            <a href="/" className="hover:opacity-60">
+              {BRAND_NAME}
+              <span className={timesBoldItalic.className}>{BRAND_SUFFIX}</span>
+            </a>
+          </div>
+          <div className="col-start-4 flex items-start gap-[12px]">
+            <a href="/" className="hover:opacity-60">
+              Home
+            </a>
+            <a href="/gallery" className="hover:opacity-60">
+              Gallery
+            </a>
+            <a href="/info" className="hover:opacity-60">
+              Info
+            </a>
+          </div>
+          <div className="col-start-6 flex justify-end">
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="hover:opacity-60"
             >
-              <FadeInText>
-                {TAGLINE_LEAD}{" "}
-                <span className={timesBoldItalic.className}>
-                  {TAGLINE_ACCENT}
-                </span>
-              </FadeInText>
-            </div>
+              Contact
+            </a>
           </div>
-          <div className="h-[250px]"></div>
+        </div>
+      </header>
 
-          {/* Gallery Grid */}
-          <div id="overview" className="scroll-mt-[80px]">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-[12px] md:gap-x-[48px] lg:gap-x-[96px] gap-y-[12px] md:gap-y-[48px] items-end">
-              {projects.map((project, i) => {
-                const columnIndex = i % columns;
-                const isVisible = visibleImages.has(i);
-                const transitionDelay = columnIndex * 100;
-                const isDimmed =
-                  hoveredImageIndex !== null && hoveredImageIndex !== i;
+      {/* Fixed thumbnail row — ignores horizontal page padding */}
+      <div
+        className="fixed left-0 right-0 top-1/2 -translate-y-1/2 z-40 flex items-center gap-[8px] overflow-x-auto overflow-y-hidden scroll-smooth px-[20px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        style={{ WebkitOverflowScrolling: "touch" }}
+        aria-label="Featured photos"
+      >
+        {thumbs.map((project, i) => {
+          const isActive = i === activeIndex;
+          return (
+            <button
+              key={project.id ?? i}
+              type="button"
+              onMouseEnter={() => setActiveIndex(i)}
+              onPointerEnter={() => setActiveIndex(i)}
+              onFocus={() => setActiveIndex(i)}
+              onClick={() => setActiveIndex(i)}
+              className="flex-shrink-0 block cursor-pointer focus:outline-none h-[48px] md:h-[64px] lg:h-[72px]"
+              style={{
+                opacity: isActive ? 1 : 0.2,
+                filter: isActive ? "grayscale(0%)" : "grayscale(100%)",
+                transition:
+                  "opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), filter 400ms cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+              aria-label={project.title}
+            >
+              <Image
+                src={project.image}
+                alt=""
+                width={project.width ?? 800}
+                height={project.height ?? 800}
+                quality={75}
+                className="block h-full w-auto"
+                sizes="120px"
+              />
+            </button>
+          );
+        })}
+      </div>
 
-                return (
-                  <div
-                    key={project.id ?? i}
-                    data-image-index={i}
-                    className="flex flex-col gap-[8px] group cursor-pointer"
-                    onMouseEnter={() => setHoveredImageIndex(i)}
-                    onMouseLeave={() =>
-                      setHoveredImageIndex((current) =>
-                        current === i ? null : current,
-                      )
-                    }
-                    onClick={(e) => {
-                      setCursorStartPos({ x: e.clientX, y: e.clientY });
-
-                      const imageElement = e.currentTarget.querySelector("img");
-                      if (imageElement) {
-                        const rect = imageElement.getBoundingClientRect();
-                        setInitialImagePosition({
-                          x: rect.left + rect.width / 2,
-                          y: rect.top + rect.height / 2,
-                          width: rect.width,
-                          height: rect.height,
-                        });
-                      }
-                      setCurrentImageIndex(i);
-                      setLightboxOpen(true);
-                      setHoveredImageIndex(null);
-                    }}
-                  >
-                    <div
-                      className="w-full relative"
-                      style={{
-                        opacity: isDimmed ? 0.1 : 1,
-                        filter: isDimmed ? "grayscale(100%)" : "grayscale(0%)",
-                        transition:
-                          "opacity 0.3s ease-out, filter 0.3s ease-out",
-                      }}
-                    >
-                      <Image
-                        src={project.image}
-                        alt={project.title}
-                        width={project.width ?? 800}
-                        height={project.height ?? 800}
-                        quality={75}
-                        className="w-full h-auto"
-                        style={{
-                          opacity: isVisible ? 1 : 0,
-                          transition:
-                            "opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
-                          transitionDelay: isVisible
-                            ? `${transitionDelay}ms`
-                            : "0ms",
-                        }}
-                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
-                      />
-                    </div>
-                    <div
-                      className="flex flex-col gap-[4px] text-[10px] leading-none tracking-[0.04em]"
-                      style={{
-                        opacity: isVisible ? 1 : 0,
-                        transition: "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-                        transitionDelay: isVisible
-                          ? `${transitionDelay + 200}ms`
-                          : "0ms",
-                      }}
-                    >
-                      <div className="flex items-center gap-[6px]">
-                        <span
-                          className={`transition-colors duration-700 ${
-                            scrolled ? "text-white" : "text-black"
-                          }`}
-                          style={{ fontWeight: 500 }}
-                        >
-                          {project.title}
-                        </span>
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center">
-                          <svg
-                            width="5"
-                            height="5"
-                            viewBox="0 0 5 5"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <circle
-                              cx="2.5"
-                              cy="2.5"
-                              r="2.25"
-                              className={`transition-colors duration-700 ${
-                                scrolled ? "fill-white" : "fill-black"
-                              }`}
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                      <span
-                        className={`transition-colors duration-700 ${
-                          scrolled ? "text-[#D0D0D0]" : "text-[#ACACAC]"
-                        }`}
-                        style={{ fontWeight: 500 }}
-                      >
-                        {project.description}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+      {/* Fixed Footer */}
+      <footer className="fixed bottom-0 left-0 right-0 z-50 px-[20px] py-[20px] pointer-events-none mix-blend-difference text-white">
+        <div className="w-full grid grid-cols-6 gap-x-[20px] items-end text-[12px] leading-none tracking-[0.03em]">
+          <div className="col-start-1 pointer-events-auto">
+            {TAGLINE_LEAD}{" "}
+            <span className={timesBoldItalic.className}>{TAGLINE_ACCENT}</span>
           </div>
-        </section>
-      </main>
-      <Lightbox
-        isOpen={lightboxOpen}
-        currentIndex={currentImageIndex}
-        images={projects}
-        onClose={() => {
-          setLightboxOpen(false);
-          setIsOverLightboxImage(false);
-          setTimeout(() => setInitialImagePosition(null), 300);
-        }}
-        onNavigate={(index) => setCurrentImageIndex(index)}
-        scrolled={scrolled}
-        initialImagePosition={initialImagePosition}
-        onCursorSideChange={isDesktop ? setLightboxCursorSide : undefined}
-        onImageHoverChange={isDesktop ? setIsOverLightboxImage : undefined}
-      />
-    </>
+          <div className="col-start-6 flex justify-end pointer-events-auto">
+            © 2026
+          </div>
+        </div>
+      </footer>
+
+      {/* Screen-reader helper: currently active image title */}
+      <span className="sr-only" aria-live="polite">
+        {activeProject?.title}
+      </span>
+    </main>
   );
 }

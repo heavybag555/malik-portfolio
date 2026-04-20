@@ -7,6 +7,8 @@ import { timesBoldItalic } from "../fonts";
 const BRAND_NAME = "Malik Laing";
 const BRAND_SUFFIX = ", 2000";
 const CONTACT_EMAIL = "Maliklphoto1@gmail.com";
+const TAGLINE_LEAD = "Photographer and director from";
+const TAGLINE_ACCENT = "San Bernardino, California.";
 
 const PORTRAIT_SRC = "/malik-info.jpg";
 const PORTRAIT_ALT = "Malik Laing";
@@ -54,7 +56,7 @@ export default function InfoClient() {
   return (
     <main
       ref={mainRef}
-      className="fixed inset-0 w-full overflow-y-auto overscroll-contain p-3 pb-12 flex flex-col z-[100]"
+      className="fixed inset-0 w-full overflow-y-auto overscroll-contain px-[20px] pt-[60px] pb-[60px] flex flex-col z-[100]"
       style={{
         backgroundColor: scrolled
           ? "rgba(0, 67, 224, 0.95)"
@@ -63,9 +65,9 @@ export default function InfoClient() {
         WebkitOverflowScrolling: "touch",
       }}
     >
-      <header className="fixed top-0 left-0 right-0 z-50 py-[12px] px-[12px]">
+      <header className="fixed top-0 left-0 right-0 z-50 px-[20px] py-[20px]">
         <div
-          className={`w-full flex items-start gap-[8px] text-[12px] leading-none tracking-[0.03em] transition-colors duration-300 ${
+          className={`w-full grid grid-cols-6 gap-x-[20px] items-start text-[12px] leading-none tracking-[0.03em] transition-colors duration-300 ${
             scrolled ? "text-white" : "text-[#0043e0]"
           }`}
           style={{
@@ -73,19 +75,24 @@ export default function InfoClient() {
             transition: "opacity 1s ease-in-out, color 300ms",
           }}
         >
-          <div className="flex-1">
+          <div className="col-start-1">
             <a href="/" className="hover:opacity-60">
               {BRAND_NAME}
               <span className={timesBoldItalic.className}>{BRAND_SUFFIX}</span>
             </a>
           </div>
-          <div className="flex-1 flex justify-end items-start gap-[12px]">
+          <div className="col-start-4 flex items-start gap-[12px]">
             <a href="/" className="hover:opacity-60">
-              Overview
+              Home
+            </a>
+            <a href="/gallery" className="hover:opacity-60">
+              Gallery
             </a>
             <a href="/info" className="hover:opacity-60">
               Info
             </a>
+          </div>
+          <div className="col-start-6 flex justify-end">
             <a
               href={`mailto:${CONTACT_EMAIL}`}
               className="hover:opacity-60"
@@ -95,6 +102,27 @@ export default function InfoClient() {
           </div>
         </div>
       </header>
+
+      {/* Fixed Footer */}
+      <footer className="fixed bottom-0 left-0 right-0 z-50 px-[20px] py-[20px] pointer-events-none">
+        <div
+          className={`w-full grid grid-cols-6 gap-x-[20px] items-end text-[12px] leading-none tracking-[0.03em] transition-colors duration-300 ${
+            scrolled ? "text-white" : "text-[#0043e0]"
+          }`}
+          style={{
+            opacity: loaded ? 1 : 0,
+            transition: "opacity 1s ease-in-out, color 300ms",
+          }}
+        >
+          <div className="col-start-1 pointer-events-auto">
+            {TAGLINE_LEAD}{" "}
+            <span className={timesBoldItalic.className}>{TAGLINE_ACCENT}</span>
+          </div>
+          <div className="col-start-6 flex justify-end pointer-events-auto">
+            © 2026
+          </div>
+        </div>
+      </footer>
 
       {/* Spacer */}
       <div style={{ paddingTop: "48px" }} />

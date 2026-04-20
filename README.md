@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Malik Laing — Portfolio
 
-## Getting Started
+Next.js (App Router) photography portfolio. **Only the gallery photos are
+managed through Sanity CMS** — tagline, bio, brand, metadata, and every
+other string live in the codebase.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 + React 19 + Tailwind v4
+- Sanity v3 (embedded Studio at `/studio`)
+- Content model: one `homePage` singleton containing an ordered array of
+  `galleryPhoto` objects (title / description / year / image).
+
+## Local dev
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev            # http://localhost:3001
+# Studio: http://localhost:3001/studio
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+If `NEXT_PUBLIC_SANITY_PROJECT_ID` is not set, the site falls back to the
+bundled local copy (`app/photoMetadata.json` + `public/ML-photos`) so the
+UI still renders.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` → `.env.local` and fill in:
 
-## Learn More
+| Variable                          | Required where | Notes |
+|-----------------------------------|----------------|-------|
+| `NEXT_PUBLIC_SANITY_PROJECT_ID`   | local + Vercel | Public; from sanity.io/manage |
+| `NEXT_PUBLIC_SANITY_DATASET`      | local + Vercel | `production` |
+| `SANITY_TOKEN`                    | local only     | Editor token for `npm run seed:sanity` and `npm run cleanup:sanity`. **Do not** add to Vercel. |
 
-To learn more about Next.js, take a look at the following resources:
+## Sanity setup (one-time)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Create a project at [sanity.io/manage](https://sanity.io/manage). Note the project ID.
+2. In that project → **API** → **CORS origins**, add (with "Allow credentials" enabled):
+   - `http://localhost:3001`
+   - `https://<your-vercel-domain>`
+3. In **API** → **Tokens**, create a token with role **Editor**. Copy it to `.env.local` as `SANITY_TOKEN`.
+4. Seed the dataset from the current local assets:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm run seed:sanity
+   ```
 
-## Deploy on Vercel
+   This uploads every photo in `public/ML-photos/` (ordered by
+   `data/photoOrder.ts`) and creates the `homePage` document. Safe to
+   re-run — it upserts.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+5. Open `/studio` to edit captions / reorder / add photos.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Editor model
+
+- **Gallery** (the only Studio entry) — an ordered array of photos. Each
+  photo has:
+  - **Title** — first caption line (e.g. "Dae").
+  - **Description** — location shown before the year (e.g. "Redlands").
+  - **Year** — integer, shown after the description.
+  - **Image** — uploaded asset; hotspot/crop supported.
+
+  Drag to reorder. The front-end renders captions as
+  `description, year` to preserve the original look.
+
+## Deploy
+
+Add the two public `NEXT_PUBLIC_SANITY_*` vars to Vercel Project Settings →
+Environment Variables. Deploy as normal. The Studio at `/studio` is served
+from the same deployment.
+
+## Dev-server note
+
+`package.json`'s `dev` script sets `WATCHPACK_POLLING=true` to avoid
+macOS `kqueue` exhaustion from the Sanity dep tree — without it, Next's
+Turbopack can silently fail to index routes and return 404s for every page.

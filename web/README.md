@@ -1,9 +1,10 @@
 # Malik Laing — Portfolio (web)
 
-Next.js (App Router) photography portfolio. **All editorial content —
-gallery photos, the Info page bio/portrait, and site-wide brand/contact/
-tagline copy — is managed through Sanity CMS.** Nothing user-facing is
-hardcoded in the codebase.
+Next.js (App Router) photography portfolio. **All editorial content and
+media — gallery photos, the Info page bio/portrait, and site-wide
+brand/contact/tagline copy — lives exclusively in Sanity.** No photos or
+other content assets are stored in this repo; everything is fetched from
+Sanity's CDN at request time.
 
 This is the `web/` app of the `maliklphoto.xyz` monorepo. The Sanity Studio
 lives standalone in the sibling `../studio` folder — see its README for
@@ -12,7 +13,7 @@ schema/content-model details.
 ## Stack
 
 - Next.js 16 + React 19 + Tailwind v4
-- `next-sanity` + `@sanity/client` for content fetching (no embedded Studio)
+- `next-sanity` for content fetching (no embedded Studio, no local assets)
 - Content model (defined in `../studio/schemaTypes`):
   - `homePage` singleton — ordered array of `galleryPhoto` objects (title / description / year / image)
   - `infoPage` singleton — portrait, bio paragraphs, Instagram handle/URL
@@ -43,32 +44,22 @@ Copy `.env.example` → `.env.local` and fill in:
 |-----------------------------------|----------------|-------|
 | `NEXT_PUBLIC_SANITY_PROJECT_ID`   | local + Vercel | Public; from sanity.io/manage |
 | `NEXT_PUBLIC_SANITY_DATASET`      | local + Vercel | `production` |
-| `SANITY_TOKEN`                    | local only     | Editor token for `npm run seed:sanity`. **Do not** add to Vercel. |
 
 ## Sanity setup
 
 The Sanity project (`ko5xg1lg` / dataset `production`) and Studio already
-exist in `../studio`. To connect a fresh checkout of this app to it:
+exist in `../studio`, and all content/media has already been migrated in.
+To connect a fresh checkout of this app to it, add this app's origin to the
+project's CORS origins (with "Allow credentials" enabled), either via
+`npx sanity cors add <url> --credentials` from `../studio`, or in
+[sanity.io/manage](https://sanity.io/manage):
 
-1. Add this app's origin to the project's CORS origins (with "Allow
-   credentials" enabled), either via `npx sanity cors add <url> --credentials`
-   from `../studio`, or in [sanity.io/manage](https://sanity.io/manage):
-   - `http://localhost:3001`
-   - `https://<your-vercel-domain>`
-2. In **API** → **Tokens**, create a token with role **Editor** and copy it
-   to `.env.local` as `SANITY_TOKEN` (or run
-   `npx sanity tokens create "seed-sanity" --role=editor` from `../studio`).
-3. Seed the dataset from the local launch assets (safe to re-run — it upserts):
+- `http://localhost:3001`
+- `https://<your-vercel-domain>`
 
-   ```bash
-   npm run seed:sanity
-   ```
-
-   This uploads every photo in `public/ML-photos/` plus the portrait in
-   `public/malik-info.jpg`, and creates the `homePage`, `infoPage`, and
-   `siteSettings` documents with the site's original copy.
-4. Open the Studio (`npm run dev` in `../studio`, or its deployed URL) to
-   add / edit content.
+Open the Studio (`npm run dev` in `../studio`, or the deployed URL) to add
+or edit content — photos, bio, and site copy are managed there, not in this
+codebase.
 
 ## Editor model
 

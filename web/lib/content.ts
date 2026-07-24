@@ -44,7 +44,7 @@ export interface SiteSettingsContent {
 // ---- Defaults (mirror the site's original hardcoded copy) ------------------
 
 const DEFAULT_INFO: InfoContent = {
-  portraitUrl: "/malik-info.jpg",
+  portraitUrl: null,
   portraitAlt: "Malik Laing",
   bioParagraphs: [
     "Malik Laing [b. 2000] is an independent photographer hailing from San Bernardino, California.",

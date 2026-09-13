@@ -25,7 +25,7 @@ Run the app and the Studio side by side, in separate terminals:
 
 ```bash
 npm install
-npm run dev              # web app → http://localhost:3001
+npm run dev              # web app → http://localhost:3107
 
 cd ../studio
 npm install
@@ -54,7 +54,7 @@ project's CORS origins (with "Allow credentials" enabled), either via
 `npx sanity cors add <url> --credentials` from `../studio`, or in
 [sanity.io/manage](https://sanity.io/manage):
 
-- `http://localhost:3001`
+- `http://localhost:3107`
 - `https://<your-vercel-domain>`
 
 Open the Studio (`npm run dev` in `../studio`, or the deployed URL) to add

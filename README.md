@@ -19,5 +19,5 @@ maliklphoto.xyz/
 cd studio && npm run dev     # http://localhost:3333
 
 # Terminal 2
-cd web && npm run dev        # http://localhost:3001
+cd web && npm run dev        # http://localhost:3107
 ```

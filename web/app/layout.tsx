@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import OverlayWrapper from "./OverlayWrapper";
 import SmoothScroll from "./components/SmoothScroll";
@@ -34,6 +35,7 @@ export default async function RootLayout({
         <OverlayWrapper>
           <PageTransition>{children}</PageTransition>
         </OverlayWrapper>
+        <Analytics />
       </body>
     </html>
   );

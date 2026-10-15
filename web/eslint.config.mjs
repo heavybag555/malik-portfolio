@@ -13,14 +13,6 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
-  {
-    files: ["app/components/Lightbox.tsx"],
-    rules: {
-      // Enter, exit, and crossfade set state from open/index changes.
-      // That timing is the animation; it already shipped this way.
-      "react-hooks/set-state-in-effect": "off",
-    },
-  },
 ]);
 
 export default eslintConfig;

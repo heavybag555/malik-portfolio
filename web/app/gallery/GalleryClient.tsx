@@ -105,7 +105,7 @@ export default function GalleryClient({
           initialPosition={cursorStartPos}
         />
       )}
-      <main className="safe-gallery w-full min-h-screen flex flex-col gap-[48px] bg-white opacity-100 pointer-events-auto">
+      <main className="w-full min-h-screen px-[20px] pt-[60px] pb-[60px] flex flex-col gap-[48px] bg-white opacity-100 pointer-events-auto">
         <section className="w-full flex flex-col gap-0">
           <div className="grid grid-cols-2 md:grid-cols-1 lg:grid-cols-6 gap-x-[20px] gap-y-[48px] items-end">
             {projects.map((project, i) => {
@@ -195,7 +195,7 @@ export default function GalleryClient({
         </section>
       </main>
       {/* Fixed Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 z-50 safe-footer pointer-events-none mix-blend-difference text-white">
+      <footer className="fixed bottom-0 left-0 right-0 z-50 px-[20px] py-[20px] pointer-events-none mix-blend-difference text-white">
         <div className="text-3 w-full grid grid-cols-2 lg:grid-cols-6 gap-x-[20px] items-end">
           <div className="col-start-1 min-w-0 pointer-events-auto">
             {taglineLead}

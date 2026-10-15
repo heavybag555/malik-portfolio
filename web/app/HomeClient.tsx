@@ -15,20 +15,6 @@ const THUMB_HEIGHT_DESKTOP = 72;
 const THUMB_HEIGHT_TABLET = 64;
 const THUMB_HEIGHT_MOBILE = 48;
 
-function horizontalSafeArea(): number {
-  const probe = document.createElement("div");
-  probe.setAttribute("aria-hidden", "true");
-  probe.style.cssText =
-    "position:fixed;visibility:hidden;pointer-events:none;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);";
-  document.body.appendChild(probe);
-  const styles = getComputedStyle(probe);
-  const inset =
-    (Number.parseFloat(styles.paddingLeft) || 0) +
-    (Number.parseFloat(styles.paddingRight) || 0);
-  probe.remove();
-  return inset;
-}
-
 interface HomeClientProps {
   projects: Project[];
   taglineLead: string;
@@ -63,7 +49,7 @@ export default function HomeClient({
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
-      setViewportWidth(Math.max(0, w - horizontalSafeArea()));
+      setViewportWidth(w);
       if (w < 768) {
         setMaxThumbs(THUMB_COUNT_MOBILE);
         setThumbHeight(THUMB_HEIGHT_MOBILE);
@@ -155,7 +141,7 @@ export default function HomeClient({
 
         {/* Fixed thumbnail row — spans the full viewport width, no scrolling */}
         <div
-          className="fixed left-0 right-0 top-1/2 -translate-y-1/2 z-40 flex items-center justify-between overflow-hidden safe-thumbs"
+          className="fixed left-0 right-0 top-1/2 -translate-y-1/2 z-40 flex items-center justify-between overflow-hidden"
           aria-label="Featured photos"
         >
           {thumbs.map((project, i) => {
@@ -199,7 +185,7 @@ export default function HomeClient({
         </div>
 
         {/* Fixed Footer */}
-        <footer className="fixed bottom-0 left-0 right-0 z-50 safe-footer pointer-events-none mix-blend-difference text-white">
+        <footer className="fixed bottom-0 left-0 right-0 z-50 px-[20px] py-[20px] pointer-events-none mix-blend-difference text-white">
           <div className="text-3 w-full grid grid-cols-2 lg:grid-cols-6 gap-x-[20px] items-end">
             <div className="col-start-1 min-w-0 pointer-events-auto">
               {taglineLead}

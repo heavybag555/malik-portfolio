@@ -196,7 +196,7 @@ export default function Lightbox({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center cursor-none safe-lightbox"
+      className="fixed inset-0 z-[100] flex items-center justify-center cursor-none"
       style={{
         backgroundColor: "rgba(255, 255, 255, 0.97)",
         opacity: entered ? 1 : 0,

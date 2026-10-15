@@ -30,7 +30,7 @@ export default function InfoClient({
     <>
       <main className="fixed inset-0 h-full w-full overflow-hidden bg-white">
         {/* Bio — flows in document on mobile/tablet, absolute on desktop */}
-        <div className="relative z-40 safe-info-copy lg:absolute lg:top-0 lg:left-0 lg:right-0">
+        <div className="relative z-40 px-[20px] pt-[72px] lg:absolute lg:top-0 lg:left-0 lg:right-0 lg:pt-[60px]">
           <div className="w-full grid grid-cols-6 gap-x-[20px] items-start">
             <div className="text-5 col-span-6 md:col-span-4 lg:col-start-1 lg:col-span-3 flex flex-col gap-6 text-black">
               {bioParagraphs.map((p, i) => (
@@ -41,7 +41,7 @@ export default function InfoClient({
         </div>
 
         {/* Portrait + contact — mobile/tablet only (desktop renders these inside the fixed footer) */}
-        <div className="safe-info-lower lg:hidden">
+        <div className="px-[20px] pt-[48px] pb-[96px] lg:hidden">
           <div className="grid grid-cols-6 gap-x-[20px] items-end">
             <div className="col-span-3 md:col-span-2">
               {portraitUrl && (
@@ -80,7 +80,7 @@ export default function InfoClient({
       </main>
 
       {/* Desktop Footer — lifted out of <main> so mix-blend-difference composites correctly */}
-      <footer className="hidden lg:block fixed bottom-0 left-0 right-0 z-[60] safe-footer pointer-events-none">
+      <footer className="hidden lg:block fixed bottom-0 left-0 right-0 z-[60] px-[20px] py-[20px] pointer-events-none">
         <div className="text-3 w-full grid grid-cols-6 gap-x-[20px] items-end">
           <div className="col-start-4 pointer-events-auto">
             {portraitUrl && (
@@ -121,7 +121,7 @@ export default function InfoClient({
       </footer>
 
       {/* Mobile/tablet Footer — lifted out of <main> so mix-blend-difference composites correctly */}
-      <footer className="lg:hidden fixed bottom-0 left-0 right-0 z-[60] safe-footer pointer-events-none">
+      <footer className="lg:hidden fixed bottom-0 left-0 right-0 z-[60] px-[20px] py-[20px] pointer-events-none">
         <div className="text-3 w-full grid grid-cols-2 gap-x-[20px] items-end">
           <div className="col-start-2 flex justify-end pointer-events-auto mix-blend-difference text-white">
             {copyrightText}

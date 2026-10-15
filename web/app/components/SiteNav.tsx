@@ -89,11 +89,11 @@ export default function SiteNav({
         <button
           type="button"
           onClick={close}
-          className="text-3 absolute top-[20px] right-[20px] hover:opacity-60"
+          className="text-3 absolute safe-menu-close hover:opacity-60"
         >
           Close
         </button>
-        <div className="h-full w-full flex flex-col justify-end px-[20px] pb-[24px] text-5 gap-[4px]">
+        <div className="h-full w-full flex flex-col justify-end safe-menu-links text-5 gap-[4px]">
           {NAV_ITEMS.map((item) => {
             const active = isActive(pathname, item.href);
             return (
@@ -125,7 +125,7 @@ export default function SiteNav({
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-[110] px-[20px] py-[20px] mix-blend-difference text-white pointer-events-none">
+      <header className="fixed top-0 left-0 right-0 z-[110] safe-header mix-blend-difference text-white pointer-events-none">
         <div className="text-3 w-full flex items-start justify-between gap-[12px] md:grid md:grid-cols-6 md:gap-x-[20px]">
           <div className="md:col-start-1 pointer-events-auto">
             <Link href="/" className="hover:opacity-60">

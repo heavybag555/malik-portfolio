@@ -215,7 +215,7 @@ flowchart TB
 | App routes | 3 pages + `/studio` | `app/` |
 | Sanity schema types (active) | 2 (`homePage`, `galleryPhoto`) | `sanity/schemaTypes/index.ts` |
 | Largest components | `Lightbox.tsx` (278 lines), `HomeClient.tsx`, `GalleryClient.tsx` | file sizes |
-| Local dev port | 3001 | `package.json` scripts |
+| Local dev port | 3107 | `package.json` scripts |
 
 ---
 
@@ -258,7 +258,7 @@ flowchart TB
 | **Custom cursor desktop-only** | Touch devices get standard interaction; cursor labels aid lightbox wayfinding |
 | **ISR 60s** | Fresh gallery after Studio edits without full static rebuild on every caption change |
 | **Mix-blend-difference nav** | Header stays legible over any photograph without a persistent bar fill |
-| **Dev port 3001** | Avoids collision with other local Next apps (documented in README) |
+| **Dev port 3107** | Avoids collision with other local Next apps (documented in README) |
 
 ---
 

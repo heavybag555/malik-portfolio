@@ -1,12 +1,14 @@
 /**
  * Content fetching layer.
  *
- * Gallery photos are sourced exclusively from Sanity. If Sanity is not
- * configured or the fetch fails, the gallery renders empty.
+ * All editorial content (gallery photos, Info page bio/portrait, and
+ * site-wide brand/contact/tagline copy) is sourced exclusively from Sanity.
+ * If Sanity is not configured or a fetch fails, each helper falls back to
+ * the site's original launch copy so the UI never renders blank/broken.
  */
 
 import { client, isSanityConfigured, urlFor } from "./sanity";
-import { galleryQuery } from "./queries";
+import { galleryQuery, infoPageQuery, siteSettingsQuery } from "./queries";
 
 // Shape consumed by the home gallery.
 export interface Project {
@@ -17,6 +19,51 @@ export interface Project {
   width?: number;
   height?: number;
 }
+
+export interface InfoContent {
+  portraitUrl: string | null;
+  portraitAlt: string;
+  portraitWidth?: number;
+  portraitHeight?: number;
+  bioParagraphs: string[];
+  instagramHandle: string;
+  instagramUrl: string;
+}
+
+export interface SiteSettingsContent {
+  brandName: string;
+  brandSuffix: string;
+  contactEmail: string;
+  taglineLead: string;
+  taglineAccent: string;
+  copyrightText: string;
+  metaTitle: string;
+  metaDescription: string;
+}
+
+// ---- Defaults (mirror the site's original hardcoded copy) ------------------
+
+const DEFAULT_INFO: InfoContent = {
+  portraitUrl: "/malik-info.jpg",
+  portraitAlt: "Malik Laing",
+  bioParagraphs: [
+    "Malik Laing [b. 2000] is an independent photographer hailing from San Bernardino, California.",
+    "For years, he has been enveloped in the world of photography, inside and out. His lengthiest project, the community photography space Eclipse is a testament to the communal and personal themes in his work. Some of his material has been publicly featured at the Riverside Art Museum and alongside The Civil Rights Institute of Southern California.",
+  ],
+  instagramHandle: "@maliklphoto",
+  instagramUrl: "https://www.instagram.com/maliklphoto/",
+};
+
+const DEFAULT_SETTINGS: SiteSettingsContent = {
+  brandName: "Malik Laing",
+  brandSuffix: ", 2000",
+  contactEmail: "maliklphoto1@gmail.com",
+  taglineLead: "Photographer and director from",
+  taglineAccent: "San Bernardino, California.",
+  copyrightText: "© 2026",
+  metaTitle: "malik laing",
+  metaDescription: "Photography portfolio of Malik",
+};
 
 // ---- Raw Sanity response shapes -------------------------------------------
 
@@ -38,6 +85,25 @@ interface RawGallery {
     year?: number;
     image?: RawImage;
   }>;
+}
+
+interface RawInfo {
+  portrait?: RawImage;
+  portraitAlt?: string;
+  bioParagraphs?: string[];
+  instagramHandle?: string;
+  instagramUrl?: string;
+}
+
+interface RawSettings {
+  brandName?: string;
+  brandSuffix?: string;
+  contactEmail?: string;
+  taglineLead?: string;
+  taglineAccent?: string;
+  copyrightText?: string;
+  metaTitle?: string;
+  metaDescription?: string;
 }
 
 // ---- Helpers ---------------------------------------------------------------
@@ -63,7 +129,7 @@ function buildImageUrl(image: RawImage | undefined, maxWidth = 1600): string {
   }
 }
 
-// ---- Public fetcher --------------------------------------------------------
+// ---- Public fetchers --------------------------------------------------------
 
 export async function getGalleryProjects(): Promise<Project[]> {
   if (!isSanityConfigured || !client) {
@@ -98,4 +164,59 @@ export async function getGalleryProjects(): Promise<Project[]> {
   });
 
   return projects;
+}
+
+export async function getInfoContent(): Promise<InfoContent> {
+  if (!isSanityConfigured || !client) return DEFAULT_INFO;
+
+  let raw: RawInfo | null = null;
+  try {
+    raw = await client.fetch<RawInfo | null>(infoPageQuery);
+  } catch (err) {
+    console.warn("[sanity] infoPage fetch failed, using defaults:", err);
+    return DEFAULT_INFO;
+  }
+  if (!raw) return DEFAULT_INFO;
+
+  const portraitUrl = buildImageUrl(raw.portrait, 1200) || DEFAULT_INFO.portraitUrl;
+  const dims = raw.portrait?.asset?.metadata?.dimensions;
+
+  const bioParagraphs =
+    Array.isArray(raw.bioParagraphs) && raw.bioParagraphs.length > 0
+      ? raw.bioParagraphs.filter((s) => typeof s === "string" && s.length > 0)
+      : DEFAULT_INFO.bioParagraphs;
+
+  return {
+    portraitUrl,
+    portraitAlt: raw.portraitAlt || DEFAULT_INFO.portraitAlt,
+    portraitWidth: dims?.width,
+    portraitHeight: dims?.height,
+    bioParagraphs,
+    instagramHandle: raw.instagramHandle || DEFAULT_INFO.instagramHandle,
+    instagramUrl: raw.instagramUrl || DEFAULT_INFO.instagramUrl,
+  };
+}
+
+export async function getSiteSettings(): Promise<SiteSettingsContent> {
+  if (!isSanityConfigured || !client) return DEFAULT_SETTINGS;
+
+  let raw: RawSettings | null = null;
+  try {
+    raw = await client.fetch<RawSettings | null>(siteSettingsQuery);
+  } catch (err) {
+    console.warn("[sanity] siteSettings fetch failed, using defaults:", err);
+    return DEFAULT_SETTINGS;
+  }
+  if (!raw) return DEFAULT_SETTINGS;
+
+  return {
+    brandName: raw.brandName || DEFAULT_SETTINGS.brandName,
+    brandSuffix: raw.brandSuffix ?? DEFAULT_SETTINGS.brandSuffix,
+    contactEmail: raw.contactEmail || DEFAULT_SETTINGS.contactEmail,
+    taglineLead: raw.taglineLead || DEFAULT_SETTINGS.taglineLead,
+    taglineAccent: raw.taglineAccent || DEFAULT_SETTINGS.taglineAccent,
+    copyrightText: raw.copyrightText || DEFAULT_SETTINGS.copyrightText,
+    metaTitle: raw.metaTitle || raw.brandName || DEFAULT_SETTINGS.metaTitle,
+    metaDescription: raw.metaDescription || DEFAULT_SETTINGS.metaDescription,
+  };
 }

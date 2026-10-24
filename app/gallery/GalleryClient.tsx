@@ -7,14 +7,19 @@ import CustomCursor from "../components/CustomCursor";
 import { useIsDesktop } from "../hooks/useIsDesktop";
 import type { Project } from "@/lib/content";
 
-const TAGLINE_LEAD = "Photographer and director from";
-const TAGLINE_ACCENT = "San Bernardino, California.";
-
 interface GalleryClientProps {
   projects: Project[];
+  taglineLead: string;
+  taglineAccent: string;
+  copyrightText: string;
 }
 
-export default function GalleryClient({ projects }: GalleryClientProps) {
+export default function GalleryClient({
+  projects,
+  taglineLead,
+  taglineAccent,
+  copyrightText,
+}: GalleryClientProps) {
   const isDesktop = useIsDesktop();
   const scrolled = false;
   const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set());
@@ -73,7 +78,7 @@ export default function GalleryClient({ projects }: GalleryClientProps) {
     const updateColumns = () => {
       const width = window.innerWidth;
       if (width < 768) setColumns(2);
-      else if (width < 1024) setColumns(3);
+      else if (width < 1024) setColumns(1);
       else setColumns(6);
     };
 
@@ -102,7 +107,7 @@ export default function GalleryClient({ projects }: GalleryClientProps) {
       )}
       <main className="w-full min-h-screen px-[20px] pt-[60px] pb-[60px] flex flex-col gap-[48px] bg-white opacity-100 pointer-events-auto">
         <section className="w-full flex flex-col gap-0">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-[20px] gap-y-[48px] items-end">
+          <div className="grid grid-cols-2 md:grid-cols-1 lg:grid-cols-6 gap-x-[20px] gap-y-[48px] items-end">
             {projects.map((project, i) => {
               const columnIndex = i % columns;
               const isVisible = visibleImages.has(i);
@@ -135,7 +140,7 @@ export default function GalleryClient({ projects }: GalleryClientProps) {
                           ? `${transitionDelay}ms`
                           : "0ms",
                       }}
-                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 17vw"
+                      sizes="(max-width: 767px) 50vw, (max-width: 1023px) 100vw, 17vw"
                     />
                   </div>
                   <div
@@ -193,12 +198,12 @@ export default function GalleryClient({ projects }: GalleryClientProps) {
       <footer className="fixed bottom-0 left-0 right-0 z-50 px-[20px] py-[20px] pointer-events-none mix-blend-difference text-white">
         <div className="text-3 w-full grid grid-cols-2 lg:grid-cols-6 gap-x-[20px] items-end">
           <div className="col-start-1 min-w-0 pointer-events-auto">
-            {TAGLINE_LEAD}
+            {taglineLead}
             <br />
-            <span className="text-4">{TAGLINE_ACCENT}</span>
+            <span className="text-4">{taglineAccent}</span>
           </div>
           <div className="col-start-2 flex justify-end pointer-events-auto lg:col-start-6">
-            © 2026
+            {copyrightText}
           </div>
         </div>
       </footer>

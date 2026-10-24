@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "WATCHPACK_POLLING=true next dev --hostname localhost -p 3001",
+    "dev": "next dev --hostname localhost -p 3107",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "cleanup:sanity": "tsx scripts/cleanup-sanity.ts"
+    "seed:sanity": "tsx scripts/seed-sanity.ts"
   },
   "dependencies": {
     "@sanity/image-url": "^2.1.1",

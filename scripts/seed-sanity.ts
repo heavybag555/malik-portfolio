@@ -1,10 +1,12 @@
 /**
- * Seeds Sanity with the gallery photos from public/ML-photos/ and creates
- * the `homePage` document containing them. Only the gallery lives in Sanity;
- * everything else on the site is hardcoded.
+ * Seeds Sanity with all of the site's local content:
+ *   - Gallery photos from public/ML-photos/ -> homePage.photos[]
+ *   - Portrait from public/malik-info.jpg -> infoPage.portrait
+ *   - Bio, Instagram -> infoPage
+ *   - Brand, contact, tagline, copyright, SEO -> siteSettings
  *
  * Idempotent: safe to re-run. Assets already uploaded (matched by SHA-1) are
- * re-used by Sanity; the homePage document is upserted by fixed _id.
+ * re-used by Sanity; documents are upserted by fixed _id.
  *
  * Usage:  npm run seed:sanity
  * Required env (.env.local):
@@ -78,7 +80,9 @@ function splitCaption(caption?: string): {
   return { description: trimmed };
 }
 
-const PHOTOS_DIR = path.join(process.cwd(), "public", "ML-photos");
+const PUBLIC_DIR = path.join(process.cwd(), "public");
+const PHOTOS_DIR = path.join(PUBLIC_DIR, "ML-photos");
+const PORTRAIT_PATH = path.join(PUBLIC_DIR, "malik-info.jpg");
 
 function contentTypeFor(ext: string): string {
   const e = ext.replace(".", "").toLowerCase();
@@ -143,10 +147,20 @@ async function seedPhotos() {
   return photos;
 }
 
+async function seedPortrait() {
+  if (!fs.existsSync(PORTRAIT_PATH)) {
+    console.warn(`[skip] Portrait not found at ${PORTRAIT_PATH}`);
+    return null;
+  }
+  console.log("Uploading portrait (malik-info.jpg)...");
+  return uploadImage(PORTRAIT_PATH, "malik-info.jpg");
+}
+
 async function main() {
   console.log(`Seeding Sanity project "${projectId}" (dataset: ${dataset})\n`);
 
   const photos = await seedPhotos();
+  const portraitAssetId = await seedPortrait();
 
   console.log("\nUpserting homePage...");
   await client.createOrReplace({
@@ -155,7 +169,44 @@ async function main() {
     photos,
   });
 
-  console.log(`\nDone. Seeded ${photos.length} gallery photos.`);
+  console.log("Upserting infoPage...");
+  await client.createOrReplace({
+    _id: "infoPage",
+    _type: "infoPage",
+    portraitAlt: "Malik Laing",
+    bioParagraphs: [
+      "Malik Laing [b. 2000] is an independent photographer hailing from San Bernardino, California.",
+      "For years, he has been enveloped in the world of photography, inside and out. His lengthiest project, the community photography space Eclipse is a testament to the communal and personal themes in his work. Some of his material has been publicly featured at the Riverside Art Museum and alongside The Civil Rights Institute of Southern California.",
+    ],
+    instagramHandle: "@maliklphoto",
+    instagramUrl: "https://www.instagram.com/maliklphoto/",
+    ...(portraitAssetId
+      ? {
+          portrait: {
+            _type: "image",
+            asset: { _type: "reference", _ref: portraitAssetId },
+          },
+        }
+      : {}),
+  });
+
+  console.log("Upserting siteSettings...");
+  await client.createOrReplace({
+    _id: "siteSettings",
+    _type: "siteSettings",
+    brandName: "Malik Laing",
+    brandSuffix: ", 2000",
+    contactEmail: "maliklphoto1@gmail.com",
+    taglineLead: "Photographer and director from",
+    taglineAccent: "San Bernardino, California.",
+    copyrightText: "© 2026",
+    metaTitle: "malik laing",
+    metaDescription: "Photography portfolio of Malik",
+  });
+
+  console.log(
+    `\nDone. Seeded ${photos.length} gallery photos + portrait + info page + site settings.`,
+  );
   console.log("Open /studio to edit.");
 }
 

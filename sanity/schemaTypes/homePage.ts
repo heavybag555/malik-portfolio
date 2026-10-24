@@ -1,10 +1,9 @@
 import { defineType, defineField } from "sanity";
 
 /**
- * The sole editable document in Studio: the gallery photos that render on the
- * home page. Everything else on the site (tagline, bio, metadata, contact
- * email, etc.) is intentionally hardcoded in the codebase — only images are
- * managed through the CMS.
+ * The gallery photos that render on the home page and gallery grid. Site-wide
+ * copy (tagline, contact, brand) lives in `siteSettings`; the Info page's
+ * bio/portrait live in `infoPage`.
  */
 export const homePage = defineType({
   name: "homePage",

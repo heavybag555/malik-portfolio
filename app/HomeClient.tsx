@@ -7,9 +7,6 @@ import CustomCursor from "./components/CustomCursor";
 import { useIsDesktop } from "./hooks/useIsDesktop";
 import type { Project } from "@/lib/content";
 
-const TAGLINE_LEAD = "Photographer and director from";
-const TAGLINE_ACCENT = "San Bernardino, California.";
-
 const THUMB_COUNT_DESKTOP = 24;
 const THUMB_COUNT_TABLET = 12;
 const THUMB_COUNT_MOBILE = 12;
@@ -20,9 +17,17 @@ const THUMB_HEIGHT_MOBILE = 48;
 
 interface HomeClientProps {
   projects: Project[];
+  taglineLead: string;
+  taglineAccent: string;
+  copyrightText: string;
 }
 
-export default function HomeClient({ projects }: HomeClientProps) {
+export default function HomeClient({
+  projects,
+  taglineLead,
+  taglineAccent,
+  copyrightText,
+}: HomeClientProps) {
   const isDesktop = useIsDesktop();
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [maxThumbs, setMaxThumbs] = useState<number>(THUMB_COUNT_DESKTOP);
@@ -183,12 +188,12 @@ export default function HomeClient({ projects }: HomeClientProps) {
         <footer className="fixed bottom-0 left-0 right-0 z-50 px-[20px] py-[20px] pointer-events-none mix-blend-difference text-white">
           <div className="text-3 w-full grid grid-cols-2 lg:grid-cols-6 gap-x-[20px] items-end">
             <div className="col-start-1 min-w-0 pointer-events-auto">
-              {TAGLINE_LEAD}
+              {taglineLead}
               <br />
-              <span className="text-4">{TAGLINE_ACCENT}</span>
+              <span className="text-4">{taglineAccent}</span>
             </div>
             <div className="col-start-2 flex justify-end pointer-events-auto lg:col-start-6">
-              © 2026
+              {copyrightText}
             </div>
           </div>
         </footer>

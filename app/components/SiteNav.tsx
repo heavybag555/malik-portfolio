@@ -6,9 +6,9 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import ArrowUpRight from "./ArrowUpRight";
 
-const BRAND_NAME = "Malik Laing";
-const BRAND_SUFFIX = ", 2000";
-const CONTACT_EMAIL = "maliklphoto1@gmail.com";
+const DEFAULT_BRAND_NAME = "Malik Laing";
+const DEFAULT_BRAND_SUFFIX = ", 2000";
+const DEFAULT_CONTACT_EMAIL = "maliklphoto1@gmail.com";
 
 const NAV_ITEMS: Array<{ href: string; label: string }> = [
   { href: "/", label: "Home" },
@@ -40,7 +40,17 @@ function rememberHomeScroll(href: string) {
   sessionStorage.setItem("homeScrollPosition", window.scrollY.toString());
 }
 
-export default function SiteNav() {
+interface SiteNavProps {
+  brandName?: string;
+  brandSuffix?: string;
+  contactEmail?: string;
+}
+
+export default function SiteNav({
+  brandName = DEFAULT_BRAND_NAME,
+  brandSuffix = DEFAULT_BRAND_SUFFIX,
+  contactEmail = DEFAULT_CONTACT_EMAIL,
+}: SiteNavProps) {
   const pathname = usePathname() || "/";
   const mounted = useIsMounted();
   const [open, setOpen] = useState(false);
@@ -102,7 +112,7 @@ export default function SiteNav() {
             );
           })}
           <a
-            href={`mailto:${CONTACT_EMAIL}`}
+            href={`mailto:${contactEmail}`}
             onClick={close}
             className="hover:opacity-60"
           >
@@ -119,8 +129,8 @@ export default function SiteNav() {
         <div className="text-3 w-full flex items-start justify-between gap-[12px] md:grid md:grid-cols-6 md:gap-x-[20px]">
           <div className="md:col-start-1 pointer-events-auto">
             <Link href="/" className="hover:opacity-60">
-              {BRAND_NAME}
-              <span className="text-4">{BRAND_SUFFIX}</span>
+              {brandName}
+              <span className="text-4">{brandSuffix}</span>
             </Link>
           </div>
 
@@ -144,7 +154,7 @@ export default function SiteNav() {
 
           <div className="hidden md:flex md:col-start-6 justify-end pointer-events-auto">
             <a
-              href={`mailto:${CONTACT_EMAIL}`}
+              href={`mailto:${contactEmail}`}
               className="inline-flex items-center gap-[4px] hover:opacity-60"
             >
               Contact
